@@ -9,11 +9,14 @@ export async function login(
   return res.data;
 }
 export async function register(
-  name: string,
+  firstname: string,
+  lastname: string,
   email: string,
-  password: string
+  password: string,
+  role: string
+
 ): Promise<{ user: User; token: string }> {
-  const res = await http.post("/auth/login", { name, email, password });
+  const res = await http.post("/auth/register", { firstname, lastname, email, password, role });
   return res.data;
 }
 
