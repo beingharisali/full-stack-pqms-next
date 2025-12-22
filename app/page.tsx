@@ -3,7 +3,8 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// import http from "@/services/http";
+import { login } from "@/services/auth.api";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Role = "admin" | "doctor" | "receptionist";
 
@@ -15,6 +16,7 @@ interface LoginForm {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setAuth } = useAuth();
 
   const [form, setForm] = useState<LoginForm>({
     email: "",
@@ -23,6 +25,7 @@ export default function LoginPage() {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -34,41 +37,29 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    // const res = await http.post("/auth/login", {
+    setLoading(true);
 
-    //   email: form.email,
-    //   password: form.password,
-    //   role: form.role
-    // });
+    try {
+      const response = await login(form.email, form.password);
+      
+      // Check if user role matches selected role
+      if (response.user.role !== form.role) {
+        setError(`You are not registered as ${form.role}`);
+        return;
+      }
+      
+      setAuth(response.user, response.token);
+      
+      alert(`Welcome ${response.user.firstname}!`);
 
-
-
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    const user = users.find(
-      (u: any) => u.email.toLowerCase() === form.email.toLowerCase()
-    );
-
-    if (!user) {
-      alert("User not found! Please signup first.");
-      return;
+      if (form.role === "admin") router.push("/admin");
+      if (form.role === "doctor") router.push("/doctor");
+      if (form.role === "receptionist") router.push("/receptionist");
+    } catch (error: any) {
+      setError(error.response?.data?.msg || "Login failed!");
+    } finally {
+      setLoading(false);
     }
-
-    if (user.password !== form.password) {
-      alert("Incorrect password!");
-      return;
-    }
-
-    if (user.role !== form.role) {
-      alert(`You are not registered as ${form.role}`);
-      return;
-    }
-
-    alert(`Welcome ${user.firstname}!`);
-
-    if (form.role === "admin") router.push("/admin");
-    if (form.role === "doctor") router.push("/doctor");
-    if (form.role === "receptionist") router.push("/receptionist");
   };
 
   return (
@@ -112,9 +103,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="bg-cyan-400 text-black rounded-lg p-3 font-semibold hover:bg-cyan-300"
+            disabled={loading}
+            className="bg-cyan-400 text-black rounded-lg p-3 font-semibold hover:bg-cyan-300 disabled:opacity-50"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
