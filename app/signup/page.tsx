@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-// import http from "@/services/http";
+import { register } from "@/services/auth.api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setAuth } = useAuth();
 
   const [form, setForm] = useState({
     firstname: "",
@@ -16,6 +18,8 @@ export default function SignupPage() {
     role: "admin",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -24,45 +28,30 @@ export default function SignupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // const res = await http.post("/auth/register", {
-    //   firstname: form.firstname,
-    //   lastname: form.lastname,
-    //   email: form.email,
-    //   password: form.password,
-
-    // });
-
-
-
     if (!form.firstname || !form.lastname || !form.email || !form.password) {
       alert("All fields are required!");
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    const exists = users.find(
-      (u) => u.email.toLowerCase() === form.email.toLowerCase()
-    );
-
-    if (exists) {
-      alert("User already exists! Please login.");
-      return;
+    setLoading(true);
+    try {
+      const response = await register(
+        form.firstname,
+        form.lastname,
+        form.email,
+        form.password,
+        form.role
+      );
+      
+      setAuth(response.user, response.token);
+      
+      alert("Signup successful!");
+      router.push("/");
+    } catch (error) {
+      alert(error.response?.data?.msg || "Signup failed!");
+    } finally {
+      setLoading(false);
     }
-
-    const newUser = {
-      firstname: form.firstname.trim(),
-      lastname: form.lastname.trim(),
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
-      role: form.role,
-    };
-
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-
-    alert("Signup successful!");
-    router.push("/");
   };
 
   return (
@@ -119,9 +108,10 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="bg-cyan-400 text-black rounded-lg p-3 font-semibold hover:bg-cyan-300"
+            disabled={loading}
+            className="bg-cyan-400 text-black rounded-lg p-3 font-semibold hover:bg-cyan-300 disabled:opacity-50"
           >
-            Signup
+            {loading ? "Signing up..." : "Signup"}
           </button>
         </form>
 
