@@ -19,7 +19,7 @@ export default function Sidebar() {
                 {links.map((link) => (
                     <Link
                         key={link.name}
-                        href="/"
+                        href=""
                         className={`px-4 py-2 rounded-lg text-center font-medium transition-colors ${pathname === link.href
                             ? "bg-white text-gray-900"
                             : "hover:bg-gray-700 hover:text-white"
