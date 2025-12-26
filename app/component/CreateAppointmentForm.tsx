@@ -101,7 +101,7 @@ export default function CreateEditAppointmentForm({
   }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow rounded">
+    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-xl font-semibold mb-4">
         {isEditMode ? "Edit Appointment" : "Create Appointment"}
       </h2>

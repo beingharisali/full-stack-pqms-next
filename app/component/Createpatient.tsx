@@ -90,7 +90,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow rounded dark:text-black">
+    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:text-black">
       <h2 className="text-xl font-semibold mb-4">
         {isEditMode ? "Edit Patient" : "Create Patient"}
       </h2>
