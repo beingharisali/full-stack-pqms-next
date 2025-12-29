@@ -91,7 +91,10 @@ export default function Page() {
 
                 <tbody>
                   {currentPatients.map((patient) => (
-                    <tr key={patient._id} className="border-b">
+                    <tr
+                      key={patient._id}
+                      className="border-b dark:hover:bg-gray-700 transition"
+                    >
                       <td className="px-6 py-4 flex items-center gap-3">
                         <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">
                           {patient.name

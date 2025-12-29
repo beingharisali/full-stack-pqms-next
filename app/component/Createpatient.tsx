@@ -90,7 +90,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
   }
 
   return (
-    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:text-black">
+    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:bg-gray-900">
       <h2 className="text-xl font-semibold mb-4">
         {isEditMode ? "Edit Patient" : "Create Patient"}
       </h2>
@@ -102,7 +102,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Patient Name"
           value={patient.name}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded dark:text-black"
+          className="w-full border px-3 py-2 rounded "
           required
         />
 
@@ -112,7 +112,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Age"
           value={patient.age}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  dark:text-black"
+          className="w-full border px-3 py-2 rounded  "
           required
         />
 
@@ -121,7 +121,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Medical History"
           value={patient.history}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  dark:text-black"
+          className="w-full border px-3 py-2 rounded  "
           rows={4}
           required
         />

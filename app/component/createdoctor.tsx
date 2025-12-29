@@ -81,7 +81,7 @@ function Createdoctor({ id }: CreateEditDocterProps) {
     );
   }
   return (
-    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:text-black">
+    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded  dark:bg-gray-900">
       <h2 className="text-2xl font-bold ">
         {isEditMode ? "Edit Docter" : "Create Docter"}
       </h2>
@@ -108,7 +108,7 @@ function Createdoctor({ id }: CreateEditDocterProps) {
           name="availability"
           onChange={handleChange}
           value={doctor.availability}
-          className="w-full px-3 py-3 border rounded"
+          className="w-full px-3 py-3 border rounded dark:bg-gray-900"
         >
           <option value="morning">Morning</option>
           <option value="evening">Evening</option>
