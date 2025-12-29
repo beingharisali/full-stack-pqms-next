@@ -46,7 +46,7 @@ export default function SignupPage() {
       setAuth(response.user, response.token);
       
       alert("Signup successful!");
-      router.push("/");
+      router.push("/admin");
     } catch (error) {
       alert(error.response?.data?.msg || "Signup failed!");
     } finally {
