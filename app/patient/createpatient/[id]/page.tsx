@@ -5,14 +5,10 @@ import Sidebar from "../../../component/sidebar";
 import Navbar from "../../../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import CreateEditPatientForm from "@/app/component/Createpatient";
+import { useParams } from "next/navigation";
 
-interface EditPatientPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function Page({ params }: EditPatientPageProps) {
+export default function Page() {
+  const params = useParams<{ id: string }>();
   return (
     <div className="flex flex-col min-h-screen bg-gray-500">
       <Navbar onLogout={() => console.log("logout")} />

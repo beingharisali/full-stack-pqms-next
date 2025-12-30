@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import http from "@/services/http";
 
 interface Patient {
   _id: string;
@@ -15,7 +16,7 @@ interface Patient {
 }
 
 export default function Page() {
-  const patients: Patient[] = [
+  const patient: Patient[] = [
     { _id: "1", name: "Ali Khan", age: "28", history: "Diabetes for 3 years" },
     { _id: "2", name: "Sara Ahmed", age: "34", history: "High blood pressure" },
     {
@@ -38,6 +39,20 @@ export default function Page() {
     },
   ];
   const router = useRouter();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await http.get<Patient[]>("/patients");
+        console.log(res.data.data);
+        setPatients(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -49,11 +64,18 @@ export default function Page() {
   );
 
   const handleEdit = (id: string) => {
-    router.push(`/doctor/createdocter/${id}`);
+    router.push(`/patient/createpatient/${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log("Delete patient", id);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this patient?")) return;
+
+    try {
+      await http.delete(`/patients/${id.trim()}`);
+      setPatients((prev) => prev.filter((d) => d._id !== id));
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
   };
 
   return (

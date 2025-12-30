@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import http from "@/services/http";
 
 interface Patient {
   name: string;
@@ -30,9 +31,8 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
     const fetchAppointment = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/appointments/${id}`);
-
-        const data = res.data;
+        const res = await http.get(`/patients/${id}`);
+        const data = res.data.data;
 
         setPatient({
           name: data.name,
@@ -69,10 +69,14 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
 
     try {
       if (isEditMode) {
+        if (!id) return;
+        await http.patch(`/patients/${id?.trim()}`, patient);
+        console.log("Updating patient with id:", `"${id}"`);
         // await axios.put(`/api/appointments/${id}`, payload);
         console.log(payload);
         alert("Patient updated successfully");
       } else {
+        await http.post("/patients", patient);
         // await axios.post("/api/appointments", payload);
         console.log(payload);
         alert("Patient created successfully");
@@ -130,7 +134,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
-          Create Patient
+          {isEditMode ? "Edit Patient" : "Create Patient"}
         </button>
       </form>
     </div>

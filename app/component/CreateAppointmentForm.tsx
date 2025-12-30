@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import http from "@/services/http";
 
 interface Appointment {
   patient: string;
@@ -36,9 +37,8 @@ export default function CreateEditAppointmentForm({
     const fetchAppointment = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/appointments/${id}`);
-
-        const data = res.data;
+        const res = await http.get(`/appointments/${id}`);
+        const data = res.data.data;
 
         setAppointment({
           patient: data.patient,
@@ -78,10 +78,13 @@ export default function CreateEditAppointmentForm({
 
     try {
       if (isEditMode) {
+        if (!id) return;
         // await axios.put(`/api/appointments/${id}`, payload);
-        console.log(payload);
+        await http.patch(`/appointments/${id?.trim()}`, payload);
+        console.log("Updating doctor with id:", `"${id}"`);
         alert("Appointment updated successfully");
       } else {
+        await http.post("/appointments", payload);
         // await axios.post("/api/appointments", payload);
         console.log(payload);
         alert("Appointment created successfully");
