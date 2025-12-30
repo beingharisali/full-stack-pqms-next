@@ -1,4 +1,6 @@
 "use client";
+import { createDoctor } from "@/services/doctor";
+import http from "@/services/http";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 type Availability = "morning" | "afternoon" | "evening";
@@ -19,14 +21,15 @@ function Createdoctor({ id }: CreateEditDocterProps) {
   });
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
+  console.log(id);
 
   useEffect(() => {
     if (!id) return;
     const fetchDocter = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/doctors/${id}`);
-        const data = res.data;
+        const res = await http.get(`/doctors/${id}`);
+        const data = res.data.data;
         setDoctor({
           name: data.name,
           specialization: data.specialization,
@@ -56,10 +59,15 @@ function Createdoctor({ id }: CreateEditDocterProps) {
     e.preventDefault();
     try {
       if (isEditMode) {
+        if (!id) return;
         // await axios.put(`/api/doctors/${id}`, doctor);
+        await http.patch(`/doctors/${id?.trim()}`, doctor);
+        console.log("Updating doctor with id:", `"${id}"`);
+
         alert("Doctor updated successfully");
       } else {
-        // await axios.post("/api/doctors", doctor);
+        await http.post("/doctors", doctor);
+
         alert("Doctor created successfully");
 
         // reset after create

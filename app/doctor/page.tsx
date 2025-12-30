@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { deleteDoctor, getAllDoctors } from "@/services/doctor";
+import http from "@/services/http";
 
 export type Availability = "morning" | "afternoon" | "evening";
 
@@ -16,59 +18,74 @@ export interface Doctor {
   availability: Availability;
 }
 
-const doctors: Doctor[] = [
-  {
-    _id: "1",
-    name: "Dr Ahmed Khan",
-    specialization: "Cardiology",
-    availability: "morning",
-  },
-  {
-    _id: "2",
-    name: "Dr Sara Malik",
-    specialization: "Dermatology",
-    availability: "afternoon",
-  },
-  {
-    _id: "3",
-    name: "Dr Usman Ali",
-    specialization: "Orthopedics",
-    availability: "evening",
-  },
-  {
-    _id: "4",
-    name: "Dr Ayesha Noor",
-    specialization: "Pediatrics",
-    availability: "morning",
-  },
-  {
-    _id: "5",
-    name: "Dr Hamza Sheikh",
-    specialization: "Neurology",
-    availability: "afternoon",
-  },
-  {
-    _id: "6",
-    name: "Dr Fatima Zahra",
-    specialization: "Gynecology",
-    availability: "evening",
-  },
-  {
-    _id: "7",
-    name: "Dr Bilal Hussain",
-    specialization: "ENT",
-    availability: "morning",
-  },
-  {
-    _id: "8",
-    name: "Dr Maria Khan",
-    specialization: "Ophthalmology",
-    availability: "afternoon",
-  },
-];
+// const doctor: Doctor[] = [
+//   {
+//     _id: "1",
+//     name: "Dr Ahmed Khan",
+//     specialization: "Cardiology",
+//     availability: "morning",
+//   },
+//   {
+//     _id: "2",
+//     name: "Dr Sara Malik",
+//     specialization: "Dermatology",
+//     availability: "afternoon",
+//   },
+//   {
+//     _id: "3",
+//     name: "Dr Usman Ali",
+//     specialization: "Orthopedics",
+//     availability: "evening",
+//   },
+//   {
+//     _id: "4",
+//     name: "Dr Ayesha Noor",
+//     specialization: "Pediatrics",
+//     availability: "morning",
+//   },
+//   {
+//     _id: "5",
+//     name: "Dr Hamza Sheikh",
+//     specialization: "Neurology",
+//     availability: "afternoon",
+//   },
+//   {
+//     _id: "6",
+//     name: "Dr Fatima Zahra",
+//     specialization: "Gynecology",
+//     availability: "evening",
+//   },
+//   {
+//     _id: "7",
+//     name: "Dr Bilal Hussain",
+//     specialization: "ENT",
+//     availability: "morning",
+//   },
+//   {
+//     _id: "8",
+//     name: "Dr Maria Khan",
+//     specialization: "Ophthalmology",
+//     availability: "afternoon",
+//   },
+// ];
 
 export default function Page() {
   const router = useRouter();
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await http.get<Doctor[]>("/doctors");
+        console.log(res.data.data);
+        setDoctors(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,8 +98,15 @@ export default function Page() {
     router.push(`/doctor/createdocter/${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log("Delete doctor:", id);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this doctor?")) return;
+
+    try {
+      await http.delete(`/doctors/${id.trim()}`);
+      setDoctors((prev) => prev.filter((d) => d._id !== id));
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
   };
 
   return (

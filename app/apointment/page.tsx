@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import http from "@/services/http";
 
 interface Appointment {
+  _id: string;
   patient: string;
   doctor: string;
   appointmentdate: string;
@@ -16,46 +18,60 @@ interface Appointment {
 }
 
 // Dummy Appointment Array
-const appointments: Appointment[] = [
-  {
-    patient: "Ali Khan",
-    doctor: "Dr. Hart Hagerty",
-    appointmentdate: "2025-12-28",
-    timeslot: "10:00 AM - 10:30 AM",
-    reason: "General Checkup",
-  },
-  {
-    patient: "Sara Ahmed",
-    doctor: "Dr. Ahmed Khan",
-    appointmentdate: "2025-12-29",
-    timeslot: "11:00 AM - 11:30 AM",
-    reason: "Dental Cleaning",
-  },
-  {
-    patient: "John Doe",
-    doctor: "Dr. Sarah Johnson",
-    appointmentdate: "2025-12-30",
-    timeslot: "01:00 PM - 01:30 PM",
-    reason: "Skin Consultation",
-  },
-  {
-    patient: "Ayesha Malik",
-    doctor: "Dr. Ali Raza",
-    appointmentdate: "2025-12-31",
-    timeslot: "02:00 PM - 02:30 PM",
-    reason: "Orthopedic Checkup",
-  },
-  {
-    patient: "Omar Farooq",
-    doctor: "Dr. Hart Hagerty",
-    appointmentdate: "2026-01-01",
-    timeslot: "03:00 PM - 03:30 PM",
-    reason: "Follow-up Visit",
-  },
-];
+// const appointments: Appointment[] = [
+//   {
+//     patient: "Ali Khan",
+//     doctor: "Dr. Hart Hagerty",
+//     appointmentdate: "2025-12-28",
+//     timeslot: "10:00 AM - 10:30 AM",
+//     reason: "General Checkup",
+//   },
+//   {
+//     patient: "Sara Ahmed",
+//     doctor: "Dr. Ahmed Khan",
+//     appointmentdate: "2025-12-29",
+//     timeslot: "11:00 AM - 11:30 AM",
+//     reason: "Dental Cleaning",
+//   },
+//   {
+//     patient: "John Doe",
+//     doctor: "Dr. Sarah Johnson",
+//     appointmentdate: "2025-12-30",
+//     timeslot: "01:00 PM - 01:30 PM",
+//     reason: "Skin Consultation",
+//   },
+//   {
+//     patient: "Ayesha Malik",
+//     doctor: "Dr. Ali Raza",
+//     appointmentdate: "2025-12-31",
+//     timeslot: "02:00 PM - 02:30 PM",
+//     reason: "Orthopedic Checkup",
+//   },
+//   {
+//     patient: "Omar Farooq",
+//     doctor: "Dr. Hart Hagerty",
+//     appointmentdate: "2026-01-01",
+//     timeslot: "03:00 PM - 03:30 PM",
+//     reason: "Follow-up Visit",
+//   },
+// ];
 
 export default function Page() {
   const router = useRouter();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await http.get<Appointment[]>("/appointments");
+        console.log(res.data.data);
+        setAppointments(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,12 +83,19 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const handleEdit = (index: number) => {
-    router.push(`/apointment/createapointment/${index}`);
+  const handleEdit = (id: string) => {
+    router.push(`/apointment/createapointment/${id}`);
   };
 
-  const handleDelete = (index: number) => {
-    console.log("Delete appointment:", index);
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this appointment?")) return;
+
+    try {
+      await http.delete(`/appointments/${id.trim()}`);
+      setAppointments((prev) => prev.filter((d) => d._id !== id));
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
   };
 
   return (
@@ -113,7 +136,7 @@ export default function Page() {
                 <tbody>
                   {currentAppointments.map((appt, index) => (
                     <tr
-                      key={index}
+                      key={appt._id}
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                     >
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
@@ -134,7 +157,7 @@ export default function Page() {
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
                           <button
-                            onClick={() => handleEdit(index)}
+                            onClick={() => handleEdit(appt._id)}
                             className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                           >
                             <Pencil size={16} />
@@ -142,7 +165,7 @@ export default function Page() {
                           </button>
 
                           <button
-                            onClick={() => handleDelete(index)}
+                            onClick={() => handleDelete(appt._id)}
                             className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                           >
                             <Trash2 size={16} />

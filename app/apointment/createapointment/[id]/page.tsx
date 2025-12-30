@@ -5,6 +5,7 @@ import Sidebar from "../../../component/sidebar";
 import Navbar from "../../../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import CreateAppointmentForm from "@/app/component/CreateAppointmentForm";
 
 interface EditApointmentPageProps {
@@ -13,7 +14,8 @@ interface EditApointmentPageProps {
   };
 }
 
-export default function Page({ params }: EditApointmentPageProps) {
+export default function Page() {
+  const params = useParams<{ id: string }>();
   return (
     <div className="flex flex-col min-h-screen bg-gray-500">
       <Navbar onLogout={() => console.log("logout")} />
