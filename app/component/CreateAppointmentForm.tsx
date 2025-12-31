@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import http from "@/services/http";
 
 interface Appointment {
   patient: string;
   doctor: string;
-  appointmentdate: string;
-  timeslot: string;
+  appointmentDate: string;
+  timeSlot: string;
   reason: string;
 }
 
@@ -22,15 +21,14 @@ export default function CreateEditAppointmentForm({
   const [appointment, setAppointment] = useState<Appointment>({
     patient: "",
     doctor: "",
-    appointmentdate: "",
-    timeslot: "",
+    appointmentDate: "",
+    timeSlot: "",
     reason: "",
   });
 
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // 🟢 Fetch appointment when ID exists
   useEffect(() => {
     if (!id) return;
 
@@ -43,8 +41,8 @@ export default function CreateEditAppointmentForm({
         setAppointment({
           patient: data.patient,
           doctor: data.doctor,
-          appointmentdate: data.appointmentdate.slice(0, 10),
-          timeslot: data.timeslot,
+          appointmentDate: data.appointmentDate.slice(0, 10),
+          timeSlot: data.timeSlot,
           reason: data.reason,
         });
       } catch (error) {
@@ -57,7 +55,6 @@ export default function CreateEditAppointmentForm({
     fetchAppointment();
   }, [id]);
 
-  // handle change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -67,34 +64,29 @@ export default function CreateEditAppointmentForm({
     setAppointment((prev) => ({ ...prev, [name]: value }));
   };
 
-  // handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const payload = {
       ...appointment,
-      appointmentdate: new Date(appointment.appointmentdate),
+      appointmentDate: new Date(appointment.appointmentDate),
     };
 
     try {
       if (isEditMode) {
         if (!id) return;
-        // await axios.put(`/api/appointments/${id}`, payload);
-        await http.patch(`/appointments/${id?.trim()}`, payload);
-        console.log("Updating doctor with id:", `"${id}"`);
+        await http.put(`/appointments/${id}`, payload);
         alert("Appointment updated successfully");
       } else {
         await http.post("/appointments", payload);
-        // await axios.post("/api/appointments", payload);
-        console.log(payload);
         alert("Appointment created successfully");
       }
     } catch (error) {
       console.error("Submit failed", error);
+      alert("Operation failed. Please try again.");
     }
   };
 
-  // loading UI
   if (loading) {
     return (
       <div className="text-center py-10 font-semibold">
@@ -114,7 +106,7 @@ export default function CreateEditAppointmentForm({
           name="patient"
           value={appointment.patient}
           onChange={handleChange}
-          placeholder="Patient"
+          placeholder="Patient ID"
           className="w-full border px-3 py-2 rounded"
           required
         />
@@ -123,25 +115,25 @@ export default function CreateEditAppointmentForm({
           name="doctor"
           value={appointment.doctor}
           onChange={handleChange}
-          placeholder="Doctor"
+          placeholder="Doctor ID"
           className="w-full border px-3 py-2 rounded"
           required
         />
 
         <input
           type="date"
-          name="appointmentdate"
-          value={appointment.appointmentdate}
+          name="appointmentDate"
+          value={appointment.appointmentDate}
           onChange={handleChange}
           className="w-full border px-3 py-2 rounded"
           required
         />
 
         <input
-          name="timeslot"
-          value={appointment.timeslot}
+          name="timeSlot"
+          value={appointment.timeSlot}
           onChange={handleChange}
-          placeholder="Time Slot"
+          placeholder="Time Slot (e.g., 10:00 AM - 11:00 AM)"
           className="w-full border px-3 py-2 rounded"
           required
         />
@@ -150,10 +142,9 @@ export default function CreateEditAppointmentForm({
           name="reason"
           value={appointment.reason}
           onChange={handleChange}
-          placeholder="Reason"
+          placeholder="Reason for appointment"
           className="w-full border px-3 py-2 rounded"
           rows={3}
-          required
         />
 
         <button

@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import http from "@/services/http";
 
 interface Patient {
   name: string;
-  age: string;
+  age: number;
   history: string;
 }
 
@@ -17,18 +16,17 @@ interface CreateEditPatientProps {
 export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
   const [patient, setPatient] = useState<Patient>({
     name: "",
-    age: "",
+    age: 0,
     history: "",
   });
 
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // 🟢 Fetch appointment when ID exists
   useEffect(() => {
     if (!id) return;
 
-    const fetchAppointment = async () => {
+    const fetchPatient = async () => {
       try {
         setLoading(true);
         const res = await http.get(`/patients/${id}`);
@@ -40,53 +38,45 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           history: data.history,
         });
       } catch (error) {
-        console.error("Failed to create patient", error);
+        console.error("Failed to fetch patient", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAppointment();
+    fetchPatient();
   }, [id]);
 
-  // handle change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value } = e.target;
-    setPatient((prev) => ({ ...prev, [name]: value }));
+    setPatient((prev) => ({ 
+      ...prev, 
+      [name]: name === 'age' ? parseInt(value) || 0 : value 
+    }));
   };
 
-  // handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      ...patient,
-    };
 
     try {
       if (isEditMode) {
         if (!id) return;
-        await http.patch(`/patients/${id?.trim()}`, patient);
-        console.log("Updating patient with id:", `"${id}"`);
-        // await axios.put(`/api/appointments/${id}`, payload);
-        console.log(payload);
+        await http.patch(`/patients/${id}`, patient);
         alert("Patient updated successfully");
       } else {
         await http.post("/patients", patient);
-        // await axios.post("/api/appointments", payload);
-        console.log(payload);
         alert("Patient created successfully");
       }
     } catch (error) {
       console.error("Submit failed", error);
+      alert("Operation failed. Please try again.");
     }
   };
 
-  // loading UI
   if (loading) {
     return (
       <div className="text-center py-10 font-semibold">Loading patient...</div>
@@ -106,17 +96,19 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Patient Name"
           value={patient.name}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded "
+          className="w-full border px-3 py-2 rounded"
           required
         />
 
         <input
-          type="text"
+          type="number"
           name="age"
           placeholder="Age"
           value={patient.age}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  "
+          className="w-full border px-3 py-2 rounded"
+          min="0"
+          max="150"
           required
         />
 
@@ -125,7 +117,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Medical History"
           value={patient.history}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  "
+          className="w-full border px-3 py-2 rounded"
           rows={4}
           required
         />
@@ -134,7 +126,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
-          {isEditMode ? "Edit Patient" : "Create Patient"}
+          {isEditMode ? "Update Patient" : "Create Patient"}
         </button>
       </form>
     </div>
