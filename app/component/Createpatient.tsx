@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import http from "@/services/http";
+import { useRouter } from "next/navigation";
 
 interface Patient {
   name: string;
@@ -20,7 +21,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
     age: "",
     history: "",
   });
-
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
@@ -75,11 +76,13 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
         // await axios.put(`/api/appointments/${id}`, payload);
         console.log(payload);
         alert("Patient updated successfully");
+        router.push("/patient");
       } else {
         await http.post("/patients", patient);
         // await axios.post("/api/appointments", payload);
         console.log(payload);
         alert("Patient created successfully");
+        router.push("/patient");
       }
     } catch (error) {
       console.error("Submit failed", error);

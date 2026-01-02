@@ -3,13 +3,30 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import http from "@/services/http";
+import { useRouter } from "next/navigation";
+
+import { Availability } from "../doctor/page";
 
 interface Appointment {
   patient: string;
   doctor: string;
-  appointmentdate: string;
-  timeslot: string;
+  appointmentDate: string;
+  timeSlot: string;
   reason: string;
+  status: "pending" | "approved" | "completed" | "cancelled";
+}
+
+export interface Doctor {
+  _id: string;
+  name: string;
+  specialization: string;
+  availability: Availability;
+}
+interface Patient {
+  _id: string;
+  name: string;
+  age: string;
+  history: string;
 }
 
 interface CreateEditAppointmentProps {
@@ -22,30 +39,55 @@ export default function CreateEditAppointmentForm({
   const [appointment, setAppointment] = useState<Appointment>({
     patient: "",
     doctor: "",
-    appointmentdate: "",
-    timeslot: "",
+    appointmentDate: "",
+    timeSlot: "",
     reason: "",
+    status: "pending",
   });
+  const [patients, setPatient] = useState([]);
+  const router = useRouter();
 
+  const [doctors, setDoctor] = useState([]);
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
   // 🟢 Fetch appointment when ID exists
   useEffect(() => {
+    const fetchDocter = async () => {
+      try {
+        const res = await http.get<Patient[]>("/patients");
+        console.log(res.data.data);
+        setPatient(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+      try {
+        const res = await http.get<Doctor[]>("/doctors");
+        console.log(res.data.data);
+        setDoctor(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+    fetchDocter();
     if (!id) return;
 
     const fetchAppointment = async () => {
       try {
         setLoading(true);
+
         const res = await http.get(`/appointments/${id}`);
         const data = res.data.data;
 
         setAppointment({
-          patient: data.patient,
-          doctor: data.doctor,
-          appointmentdate: data.appointmentdate.slice(0, 10),
-          timeslot: data.timeslot,
-          reason: data.reason,
+          patient: data.patient?._id || "",
+          doctor: data.doctor?._id || "",
+          appointmentDate: data.appointmentDate
+            ? data.appointmentDate.slice(0, 10)
+            : "",
+          timeSlot: data.timeSlot || "",
+          reason: data.reason || "",
+          status: data.status || "pending",
         });
       } catch (error) {
         console.error("Failed to fetch appointment", error);
@@ -73,21 +115,23 @@ export default function CreateEditAppointmentForm({
 
     const payload = {
       ...appointment,
-      appointmentdate: new Date(appointment.appointmentdate),
+      appointmentDate: new Date(appointment.appointmentDate),
     };
 
     try {
       if (isEditMode) {
         if (!id) return;
         // await axios.put(`/api/appointments/${id}`, payload);
-        await http.patch(`/appointments/${id?.trim()}`, payload);
+        await http.put(`/appointments/${id?.trim()}`, payload);
         console.log("Updating doctor with id:", `"${id}"`);
         alert("Appointment updated successfully");
+        router.push("/apointment");
       } else {
         await http.post("/appointments", payload);
         // await axios.post("/api/appointments", payload);
         console.log(payload);
         alert("Appointment created successfully");
+        router.push("/apointment");
       }
     } catch (error) {
       console.error("Submit failed", error);
@@ -110,36 +154,62 @@ export default function CreateEditAppointmentForm({
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
+        {/* Patient Select Field */}
+        <select
           name="patient"
           value={appointment.patient}
           onChange={handleChange}
-          placeholder="Patient"
           className="w-full border px-3 py-2 rounded"
           required
-        />
+        >
+          <option value="" className="dark:bg-gray-900 dark:text-white">
+            Select Patient
+          </option>
+          {patients.map((patient) => (
+            <option
+              key={patient._id}
+              value={patient._id}
+              className="dark:bg-gray-900 dark:text-white"
+            >
+              {patient.name}
+            </option>
+          ))}
+        </select>
 
-        <input
+        {/* Doctor Select Field */}
+        <select
           name="doctor"
           value={appointment.doctor}
           onChange={handleChange}
-          placeholder="Doctor"
           className="w-full border px-3 py-2 rounded"
           required
-        />
+        >
+          <option value="" className="dark:bg-gray-900 dark:text-white">
+            Select Doctor
+          </option>
+          {doctors.map((doctor) => (
+            <option
+              key={doctor._id}
+              value={doctor._id}
+              className="dark:bg-gray-900 dark:text-white"
+            >
+              {doctor.name}
+            </option>
+          ))}
+        </select>
 
         <input
           type="date"
-          name="appointmentdate"
-          value={appointment.appointmentdate}
+          name="appointmentDate"
+          value={appointment.appointmentDate}
           onChange={handleChange}
           className="w-full border px-3 py-2 rounded"
           required
         />
 
         <input
-          name="timeslot"
-          value={appointment.timeslot}
+          name="timeSlot"
+          value={appointment.timeSlot}
           onChange={handleChange}
           placeholder="Time Slot"
           className="w-full border px-3 py-2 rounded"
@@ -155,6 +225,31 @@ export default function CreateEditAppointmentForm({
           rows={3}
           required
         />
+        <select
+          name="status"
+          value={appointment.status}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        >
+          <option value="pending" className="dark:bg-gray-900 dark:text-white">
+            Pending
+          </option>
+          <option value="approved" className="dark:bg-gray-900 dark:text-white">
+            Approved
+          </option>
+          <option
+            value="completed"
+            className="dark:bg-gray-900 dark:text-white"
+          >
+            Completed
+          </option>
+          <option
+            value="cancelled"
+            className="dark:bg-gray-900 dark:text-white"
+          >
+            Cancelled
+          </option>
+        </select>
 
         <button
           type="submit"

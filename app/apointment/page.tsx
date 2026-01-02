@@ -10,11 +10,18 @@ import http from "@/services/http";
 
 interface Appointment {
   _id: string;
-  patient: string;
-  doctor: string;
-  appointmentdate: string;
-  timeslot: string;
+  patient: {
+    _id: string;
+    name: string;
+  };
+  doctor: {
+    _id: string;
+    name: string;
+  };
+  appointmentDate: string;
+  timeSlot: string;
   reason: string;
+  status: "pending" | "approved" | "completed" | "cancelled";
 }
 
 // Dummy Appointment Array
@@ -134,31 +141,36 @@ export default function Page() {
                 </thead>
 
                 <tbody>
-                  {currentAppointments.map((appt, index) => (
+                  {currentAppointments.map((appt) => (
                     <tr
                       key={appt._id}
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                     >
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                        {appt.patient}
+                        {appt.patient?.name}
                       </td>
+
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                        {appt.doctor}
+                        {appt.doctor?.name}
                       </td>
+
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                        {appt.appointmentdate}
+                        {new Date(appt.appointmentDate).toLocaleDateString()}
                       </td>
+
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                        {appt.timeslot}
+                        {appt.timeSlot}
                       </td>
+
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                        {appt.reason}
+                        {appt.reason || "-"}
                       </td>
+
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
                           <button
                             onClick={() => handleEdit(appt._id)}
-                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"
                           >
                             <Pencil size={16} />
                             Edit
@@ -166,7 +178,7 @@ export default function Page() {
 
                           <button
                             onClick={() => handleDelete(appt._id)}
-                            className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                            className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"
                           >
                             <Trash2 size={16} />
                             Delete

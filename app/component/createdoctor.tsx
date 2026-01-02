@@ -2,6 +2,7 @@
 import { createDoctor } from "@/services/doctor";
 import http from "@/services/http";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 type Availability = "morning" | "afternoon" | "evening";
 
@@ -19,6 +20,7 @@ function Createdoctor({ id }: CreateEditDocterProps) {
     specialization: "",
     availability: "morning",
   });
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
   console.log(id);
@@ -65,10 +67,13 @@ function Createdoctor({ id }: CreateEditDocterProps) {
         console.log("Updating doctor with id:", `"${id}"`);
 
         alert("Doctor updated successfully");
+        router.push("/doctor");
       } else {
         await http.post("/doctors", doctor);
 
         alert("Doctor created successfully");
+
+        router.push("/doctor");
 
         // reset after create
         setDoctor({
