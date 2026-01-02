@@ -1,40 +1,50 @@
 import http from "./http";
 import { appointment } from "@/types/appointment";
 
-// get all patient??
-export async function getAllappointment(): Promise<appointment[]> {
-    const res = await http.get("/");
-    return res.data;
+export async function getAllAppointments(): Promise<appointment[]> {
+    const res = await http.get("/appointments");
+    return res.data.data;
 }
 
-// get by one 
-export async function getappointmentById(id: string): Promise<appointment> {
-    const res = await http.get(`/${id}`);
-    return res.data;
+export async function getAppointmentById(id: string): Promise<appointment> {
+    const res = await http.get(`/appointments/${id}`);
+    return res.data.data;
 }
 
-// appointmenty created
-export async function createappointment(
-    doctor: string,
+export async function createAppointment(
     patient: string,
-    timeslot: string,
-    appointmentdate: Date,
-    reason: string,
-    status: string
+    doctor: string,
+    appointmentDate: Date,
+    timeSlot: string,
+    reason?: string,
+    status?: string
 ): Promise<appointment> {
-    const res = await http.post("/", { doctor, patient, timeslot, appointmentdate, reason, status });
-    return res.data;
+    const res = await http.post("/appointments", { 
+        patient, 
+        doctor, 
+        appointmentDate, 
+        timeSlot, 
+        reason, 
+        status 
+    });
+    return res.data.data;
 }
 
-// paitent update
-export async function updateappointment(
+export async function updateAppointment(
     id: string,
-    data: Partial<{ name: string; age: string; history: string; }>
+    data: Partial<{
+        patient: string;
+        doctor: string;
+        appointmentDate: Date;
+        timeSlot: string;
+        reason: string;
+        status: string;
+    }>
 ): Promise<appointment> {
-    const res = await http.put(`/${id}`, data);
-    return res.data;
+    const res = await http.put(`/appointments/${id}`, data);
+    return res.data.data;
 }
 
-export async function deleteappointment(id: string): Promise<void> {
-    await http.delete(`/${id}`);
+export async function deleteAppointment(id: string): Promise<void> {
+    await http.delete(`/appointments/${id}`);
 }
