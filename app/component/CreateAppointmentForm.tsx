@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import http from "@/services/http";
+import { useRouter } from "next/navigation";
+
+import { Availability } from "../doctor/page";
 
 interface Appointment {
   patient: string;
@@ -9,6 +12,20 @@ interface Appointment {
   appointmentDate: string;
   timeSlot: string;
   reason: string;
+  status: "pending" | "approved" | "completed" | "cancelled";
+}
+
+export interface Doctor {
+  _id: string;
+  name: string;
+  specialization: string;
+  availability: Availability;
+}
+interface Patient {
+  _id: string;
+  name: string;
+  age: string;
+  history: string;
 }
 
 interface CreateEditAppointmentProps {
@@ -24,26 +41,51 @@ export default function CreateEditAppointmentForm({
     appointmentDate: "",
     timeSlot: "",
     reason: "",
+    status: "pending",
   });
+  const [patients, setPatient] = useState([]);
+  const router = useRouter();
 
+  const [doctors, setDoctor] = useState([]);
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
   useEffect(() => {
+    const fetchDocter = async () => {
+      try {
+        const res = await http.get<Patient[]>("/patients");
+        console.log(res.data.data);
+        setPatient(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+      try {
+        const res = await http.get<Doctor[]>("/doctors");
+        console.log(res.data.data);
+        setDoctor(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch doctors", error);
+      }
+    };
+    fetchDocter();
     if (!id) return;
 
     const fetchAppointment = async () => {
       try {
         setLoading(true);
+
         const res = await http.get(`/appointments/${id}`);
         const data = res.data.data;
 
         setAppointment({
-          patient: data.patient,
-          doctor: data.doctor,
-          appointmentDate: data.appointmentDate.slice(0, 10),
-          timeSlot: data.timeSlot,
-          reason: data.reason,
+          patient: data.patient?._id || "",
+          doctor: data.doctor?._id || "",
+          appointmentDate: data.appointmentDate
+            ? data.appointmentDate.slice(0, 10)
+            : "",
+          timeSlot: data.timeSlot || "",
+          reason: data.reason || "",
+          status: data.status || "pending",
         });
       } catch (error) {
         console.error("Failed to fetch appointment", error);
@@ -75,11 +117,15 @@ export default function CreateEditAppointmentForm({
     try {
       if (isEditMode) {
         if (!id) return;
-        await http.put(`/appointments/${id}`, payload);
+        // await axios.put(`/api/appointments/${id}`, payload);
+        await http.put(`/appointments/${id?.trim()}`, payload);
+        console.log("Updating doctor with id:", `"${id}"`);
         alert("Appointment updated successfully");
+        router.push("/apointment");
       } else {
         await http.post("/appointments", payload);
         alert("Appointment created successfully");
+        router.push("/apointment");
       }
     } catch (error) {
       console.error("Submit failed", error);
@@ -102,23 +148,49 @@ export default function CreateEditAppointmentForm({
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input
+        {/* Patient Select Field */}
+        <select
           name="patient"
           value={appointment.patient}
           onChange={handleChange}
-          placeholder="Patient ID"
           className="w-full border px-3 py-2 rounded"
           required
-        />
+        >
+          <option value="" className="dark:bg-gray-900 dark:text-white">
+            Select Patient
+          </option>
+          {patients.map((patient) => (
+            <option
+              key={patient._id}
+              value={patient._id}
+              className="dark:bg-gray-900 dark:text-white"
+            >
+              {patient.name}
+            </option>
+          ))}
+        </select>
 
-        <input
+        {/* Doctor Select Field */}
+        <select
           name="doctor"
           value={appointment.doctor}
           onChange={handleChange}
-          placeholder="Doctor ID"
           className="w-full border px-3 py-2 rounded"
           required
-        />
+        >
+          <option value="" className="dark:bg-gray-900 dark:text-white">
+            Select Doctor
+          </option>
+          {doctors.map((doctor) => (
+            <option
+              key={doctor._id}
+              value={doctor._id}
+              className="dark:bg-gray-900 dark:text-white"
+            >
+              {doctor.name}
+            </option>
+          ))}
+        </select>
 
         <input
           type="date"
@@ -146,6 +218,31 @@ export default function CreateEditAppointmentForm({
           className="w-full border px-3 py-2 rounded"
           rows={3}
         />
+        <select
+          name="status"
+          value={appointment.status}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        >
+          <option value="pending" className="dark:bg-gray-900 dark:text-white">
+            Pending
+          </option>
+          <option value="approved" className="dark:bg-gray-900 dark:text-white">
+            Approved
+          </option>
+          <option
+            value="completed"
+            className="dark:bg-gray-900 dark:text-white"
+          >
+            Completed
+          </option>
+          <option
+            value="cancelled"
+            className="dark:bg-gray-900 dark:text-white"
+          >
+            Cancelled
+          </option>
+        </select>
 
         <button
           type="submit"

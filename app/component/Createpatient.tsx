@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import http from "@/services/http";
+import { useRouter } from "next/navigation";
 
 interface Patient {
   name: string;
@@ -19,7 +20,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
     age: 0,
     history: "",
   });
-
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
@@ -67,9 +68,11 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
         if (!id) return;
         await http.patch(`/patients/${id}`, patient);
         alert("Patient updated successfully");
+        router.push("/patient");
       } else {
         await http.post("/patients", patient);
         alert("Patient created successfully");
+        router.push("/patient");
       }
     } catch (error) {
       console.error("Submit failed", error);
