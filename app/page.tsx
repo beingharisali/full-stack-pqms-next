@@ -41,19 +41,19 @@ export default function LoginPage() {
 
     try {
       const response = await login(form.email, form.password);
-      
+
       // Check if user role matches selected role
       if (response.user.role !== form.role) {
         setError(`You are not registered as ${form.role}`);
         return;
       }
-      
+
       setAuth(response.user, response.token);
-      
+
       alert(`Welcome ${response.user.firstname}!`);
 
       if (form.role === "admin") router.push("/admin");
-      if (form.role === "doctor") router.push("/doctor");
+      if (form.role === "doctor") router.push("/doctors");
       if (form.role === "receptionist") router.push("/receptionist");
     } catch (error: any) {
       setError(error.response?.data?.msg || "Login failed!");
