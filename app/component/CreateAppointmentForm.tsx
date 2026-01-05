@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import http from "@/services/http";
 import { useRouter } from "next/navigation";
 
@@ -51,7 +50,6 @@ export default function CreateEditAppointmentForm({
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // 🟢 Fetch appointment when ID exists
   useEffect(() => {
     const fetchDocter = async () => {
       try {
@@ -99,7 +97,6 @@ export default function CreateEditAppointmentForm({
     fetchAppointment();
   }, [id]);
 
-  // handle change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -109,7 +106,6 @@ export default function CreateEditAppointmentForm({
     setAppointment((prev) => ({ ...prev, [name]: value }));
   };
 
-  // handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -128,17 +124,15 @@ export default function CreateEditAppointmentForm({
         router.push("/apointment");
       } else {
         await http.post("/appointments", payload);
-        // await axios.post("/api/appointments", payload);
-        console.log(payload);
         alert("Appointment created successfully");
         router.push("/apointment");
       }
     } catch (error) {
       console.error("Submit failed", error);
+      alert("Operation failed. Please try again.");
     }
   };
 
-  // loading UI
   if (loading) {
     return (
       <div className="text-center py-10 font-semibold">
@@ -211,7 +205,7 @@ export default function CreateEditAppointmentForm({
           name="timeSlot"
           value={appointment.timeSlot}
           onChange={handleChange}
-          placeholder="Time Slot"
+          placeholder="Time Slot (e.g., 10:00 AM - 11:00 AM)"
           className="w-full border px-3 py-2 rounded"
           required
         />
@@ -220,10 +214,9 @@ export default function CreateEditAppointmentForm({
           name="reason"
           value={appointment.reason}
           onChange={handleChange}
-          placeholder="Reason"
+          placeholder="Reason for appointment"
           className="w-full border px-3 py-2 rounded"
           rows={3}
-          required
         />
         <select
           name="status"

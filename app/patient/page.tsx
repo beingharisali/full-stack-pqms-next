@@ -11,48 +11,30 @@ import http from "@/services/http";
 interface Patient {
   _id: string;
   name: string;
-  age: string;
+  age: number;
   history: string;
 }
 
 export default function Page() {
-  const patient: Patient[] = [
-    { _id: "1", name: "Ali Khan", age: "28", history: "Diabetes for 3 years" },
-    { _id: "2", name: "Sara Ahmed", age: "34", history: "High blood pressure" },
-    {
-      _id: "3",
-      name: "Usman Raza",
-      age: "45",
-      history: "Asthma since childhood",
-    },
-    {
-      _id: "4",
-      name: "Ayesha Malik",
-      age: "26",
-      history: "No previous medical history",
-    },
-    {
-      _id: "5",
-      name: "Hassan Ali",
-      age: "52",
-      history: "Heart surgery in 2021",
-    },
-  ];
   const router = useRouter();
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchPatients = async () => {
       try {
-        const res = await http.get<Patient[]>("/patients");
-        console.log(res.data.data);
-        setPatients(res.data.data);
+        const res = await http.get("/patients");
+        setPatients(res.data.data || []);
       } catch (error) {
-        console.error("Failed to fetch doctors", error);
+        console.error("Failed to fetch patients", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDoctors();
+    fetchPatients();
   }, []);
+  
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -71,12 +53,26 @@ export default function Page() {
     if (!confirm("Are you sure you want to delete this patient?")) return;
 
     try {
-      await http.delete(`/patients/${id.trim()}`);
+      await http.delete(`/patients/${id}`);
       setPatients((prev) => prev.filter((d) => d._id !== id));
     } catch (error) {
       console.error("Delete failed", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Navbar onLogout={() => console.log("logout")} />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="text-center">Loading patients...</div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
