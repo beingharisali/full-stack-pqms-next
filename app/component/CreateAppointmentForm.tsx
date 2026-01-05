@@ -6,6 +6,7 @@ import http from "@/services/http";
 import { useRouter } from "next/navigation";
 
 import { Availability } from "../doctor/page";
+import toast from "react-hot-toast";
 
 interface Appointment {
   patient: string;
@@ -118,24 +119,28 @@ export default function CreateEditAppointmentForm({
       appointmentDate: new Date(appointment.appointmentDate),
     };
 
-    try {
-      if (isEditMode) {
-        if (!id) return;
-        // await axios.put(`/api/appointments/${id}`, payload);
-        await http.put(`/appointments/${id?.trim()}`, payload);
-        console.log("Updating doctor with id:", `"${id}"`);
-        alert("Appointment updated successfully");
-        router.push("/apointment");
-      } else {
-        await http.post("/appointments", payload);
-        // await axios.post("/api/appointments", payload);
-        console.log(payload);
-        alert("Appointment created successfully");
-        router.push("/apointment");
+    toast.promise(
+      isEditMode
+        ? http.put(`/appointments/${id?.trim()}`, payload)
+        : http.post("/appointments", payload),
+      {
+        loading: isEditMode
+          ? "Updating appointment..."
+          : "Creating appointment...",
+        success: isEditMode
+          ? "Appointment updated successfully"
+          : "Appointment created successfully",
+        error: "Operation failed",
+      },
+      {
+        style: {
+          background: "#1f2937", // gray-800
+          color: "#fff",
+          border: "1px solid #374151",
+        },
       }
-    } catch (error) {
-      console.error("Submit failed", error);
-    }
+    );
+    router.push("/apointment");
   };
 
   // loading UI
@@ -148,7 +153,7 @@ export default function CreateEditAppointmentForm({
   }
 
   return (
-    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:bg-gray-900 dark:text-white">
+    <div className="max-w-xl   mx-auto p-6 bg-white shadow rounded-xl dark:bg-gray-900 dark:text-white">
       <h2 className="text-xl font-semibold mb-4">
         {isEditMode ? "Edit Appointment" : "Create Appointment"}
       </h2>
@@ -159,17 +164,17 @@ export default function CreateEditAppointmentForm({
           name="patient"
           value={appointment.patient}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         >
-          <option value="" className="dark:bg-gray-900 dark:text-white">
+          <option value="" className="dark:bg-gray-800 dark:text-white">
             Select Patient
           </option>
           {patients.map((patient) => (
             <option
               key={patient._id}
               value={patient._id}
-              className="dark:bg-gray-900 dark:text-white"
+              className="dark:bg-gray-800 dark:text-white"
             >
               {patient.name}
             </option>
@@ -181,17 +186,17 @@ export default function CreateEditAppointmentForm({
           name="doctor"
           value={appointment.doctor}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         >
-          <option value="" className="dark:bg-gray-900 dark:text-white">
+          <option value="" className="dark:bg-gray-800 dark:text-white">
             Select Doctor
           </option>
           {doctors.map((doctor) => (
             <option
               key={doctor._id}
               value={doctor._id}
-              className="dark:bg-gray-900 dark:text-white"
+              className="dark:bg-gray-800 dark:text-white"
             >
               {doctor.name}
             </option>
@@ -203,7 +208,7 @@ export default function CreateEditAppointmentForm({
           name="appointmentDate"
           value={appointment.appointmentDate}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />
 
@@ -212,7 +217,7 @@ export default function CreateEditAppointmentForm({
           value={appointment.timeSlot}
           onChange={handleChange}
           placeholder="Time Slot"
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />
 
@@ -221,7 +226,7 @@ export default function CreateEditAppointmentForm({
           value={appointment.reason}
           onChange={handleChange}
           placeholder="Reason"
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           rows={3}
           required
         />
@@ -229,12 +234,12 @@ export default function CreateEditAppointmentForm({
           name="status"
           value={appointment.status}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
         >
-          <option value="pending" className="dark:bg-gray-900 dark:text-white">
+          <option value="pending" className="dark:bg-gray-800 dark:text-white">
             Pending
           </option>
-          <option value="approved" className="dark:bg-gray-900 dark:text-white">
+          <option value="approved" className="dark:bg-gray-800 dark:text-white">
             Approved
           </option>
           <option
@@ -253,7 +258,7 @@ export default function CreateEditAppointmentForm({
 
         <button
           type="submit"
-          className={`w-full py-2 text-white rounded ${
+          className={`w-full py-2 text-white rounded-lg ${
             isEditMode
               ? "bg-blue-600 hover:bg-blue-700"
               : "bg-green-600 hover:bg-green-700"

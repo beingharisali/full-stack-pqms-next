@@ -4,6 +4,7 @@ import http from "@/services/http";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 type Availability = "morning" | "afternoon" | "evening";
 
 interface Doctor {
@@ -59,32 +60,27 @@ function Createdoctor({ id }: CreateEditDocterProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      if (isEditMode) {
-        if (!id) return;
-        // await axios.put(`/api/doctors/${id}`, doctor);
-        await http.patch(`/doctors/${id?.trim()}`, doctor);
-        console.log("Updating doctor with id:", `"${id}"`);
 
-        alert("Doctor updated successfully");
-        router.push("/doctor");
-      } else {
-        await http.post("/doctors", doctor);
-
-        alert("Doctor created successfully");
-
-        router.push("/doctor");
-
-        // reset after create
-        setDoctor({
-          name: "",
-          specialization: "",
-          availability: "morning",
-        });
+    toast.promise(
+      isEditMode
+        ? http.patch(`/doctors/${id?.trim()}`, doctor)
+        : http.post("/doctors", doctor),
+      {
+        loading: isEditMode ? "Updating Docter..." : "Creating Docter...",
+        success: isEditMode
+          ? "Docter updated successfully"
+          : "Docter created successfully",
+        error: "Operation failed",
+      },
+      {
+        style: {
+          background: "#1f2937", // gray-800
+          color: "#fff",
+          border: "1px solid #374151",
+        },
       }
-    } catch (error) {
-      console.error("Submit failed", error);
-    }
+    );
+    router.push("/doctor");
   };
   if (loading) {
     return (
@@ -94,8 +90,8 @@ function Createdoctor({ id }: CreateEditDocterProps) {
     );
   }
   return (
-    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded  dark:bg-gray-900">
-      <h2 className="text-2xl font-bold ">
+    <div className="max-w-xl mx-auto p-6 bg-white shadow rounded  dark:bg-gray-900">
+      <h2 className="text-2xl font-bold mb-2 ">
         {isEditMode ? "Edit Docter" : "Create Docter"}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +101,7 @@ function Createdoctor({ id }: CreateEditDocterProps) {
           placeholder="Doctor Name"
           value={doctor.name}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />
         <input
@@ -114,14 +110,14 @@ function Createdoctor({ id }: CreateEditDocterProps) {
           placeholder="Specialization"
           value={doctor.specialization}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />
         <select
           name="availability"
           onChange={handleChange}
           value={doctor.availability}
-          className="w-full px-3 py-3 border rounded dark:bg-gray-900"
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
         >
           <option value="morning">Morning</option>
           <option value="evening">Evening</option>
@@ -129,7 +125,7 @@ function Createdoctor({ id }: CreateEditDocterProps) {
         </select>
 
         <button
-          className={`w-full rounded py-2 text-white ${
+          className={`w-full rounded-lg py-2 text-white ${
             isEditMode
               ? "bg-blue-600 hover:bg-blue-700"
               : "bg-green-600 hover:bg-green-700"

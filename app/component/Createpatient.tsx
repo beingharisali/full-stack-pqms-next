@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import http from "@/services/http";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface Patient {
   name: string;
@@ -68,25 +69,26 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
       ...patient,
     };
 
-    try {
-      if (isEditMode) {
-        if (!id) return;
-        await http.patch(`/patients/${id?.trim()}`, patient);
-        console.log("Updating patient with id:", `"${id}"`);
-        // await axios.put(`/api/appointments/${id}`, payload);
-        console.log(payload);
-        alert("Patient updated successfully");
-        router.push("/patient");
-      } else {
-        await http.post("/patients", patient);
-        // await axios.post("/api/appointments", payload);
-        console.log(payload);
-        alert("Patient created successfully");
-        router.push("/patient");
+    toast.promise(
+      isEditMode
+        ? http.patch(`/patients/${id?.trim()}`, patient)
+        : http.post("/patients", patient),
+      {
+        loading: isEditMode ? "Updating Patient..." : "Creating Patient...",
+        success: isEditMode
+          ? "Patient updated successfully"
+          : "Patient created successfully",
+        error: "Operation failed",
+      },
+      {
+        style: {
+          background: "#1f2937", // gray-800
+          color: "#fff",
+          border: "1px solid #374151",
+        },
       }
-    } catch (error) {
-      console.error("Submit failed", error);
-    }
+    );
+    router.push("/patient");
   };
 
   // loading UI
@@ -97,7 +99,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
   }
 
   return (
-    <div className="max-w-xlg mx-auto p-6 bg-white shadow rounded dark:bg-gray-900">
+    <div className="max-w-xl mx-auto p-6 bg-white shadow rounded dark:bg-gray-900">
       <h2 className="text-xl font-semibold mb-4">
         {isEditMode ? "Edit Patient" : "Create Patient"}
       </h2>
@@ -109,7 +111,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Patient Name"
           value={patient.name}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded "
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0 "
           required
         />
 
@@ -119,7 +121,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Age"
           value={patient.age}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  "
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />
 
@@ -128,14 +130,14 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           placeholder="Medical History"
           value={patient.history}
           onChange={handleChange}
-          className="w-full border px-3 py-2 rounded  "
+          className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0 "
           rows={4}
           required
         />
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
         >
           {isEditMode ? "Edit Patient" : "Create Patient"}
         </button>
