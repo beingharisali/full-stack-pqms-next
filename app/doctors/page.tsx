@@ -50,10 +50,22 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
+  const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
+    try {
+      await http.put(`/appointments/${id}`, { status: newStatus });
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, status: newStatus } : a))
+      );
+    } catch (error) {
+      console.error("Failed to update status", error);
+      alert("Failed to update status");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Navbar onLogout={() => console.log("logout")} />
+        <Navbar />
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
@@ -66,7 +78,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar onLogout={() => console.log("logout")} />
+      <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />
@@ -103,40 +115,34 @@ export default function Page() {
                         key={appt._id}
                         className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                       >
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.patient?.name}
-                        </td>
-
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.doctor?.name}
-                        </td>
-
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient?.name}</td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor?.name}</td>
                         <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                           {new Date(appt.appointmentDate).toLocaleDateString()}
                         </td>
-
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.timeSlot}
-                        </td>
-
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.reason || "-"}
-                        </td>
-
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                          <select
+                            value={appt.status}
+                            onChange={(e) =>
+                              handleStatusChange(appt._id, e.target.value as Appointment["status"])
+                            }
+                            className={`px-3 py-1 rounded-full text-xs font-medium capitalize cursor-pointer
                               ${appt.status === "pending"
                                 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
                                 : appt.status === "approved"
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                                : appt.status === "completed"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                                : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                  : appt.status === "completed"
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                                    : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
                               }`}
                           >
-                            {appt.status}
-                          </span>
+                            <option value="pending">pending</option>
+                            <option value="approved">approved</option>
+                            <option value="completed">completed</option>
+                            <option value="cancelled">cancelled</option>
+                          </select>
                         </td>
                       </tr>
                     ))
