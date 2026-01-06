@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import http from "@/services/http";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -19,18 +18,17 @@ interface CreateEditPatientProps {
 export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
   const [patient, setPatient] = useState<Patient>({
     name: "",
-    age: "",
+    age: 0,
     history: "",
   });
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // 🟢 Fetch appointment when ID exists
   useEffect(() => {
     if (!id) return;
 
-    const fetchAppointment = async () => {
+    const fetchPatient = async () => {
       try {
         setLoading(true);
         const res = await http.get(`/patients/${id}`);
@@ -42,26 +40,27 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           history: data.history,
         });
       } catch (error) {
-        console.error("Failed to create patient", error);
+        console.error("Failed to fetch patient", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAppointment();
+    fetchPatient();
   }, [id]);
 
-  // handle change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value } = e.target;
-    setPatient((prev) => ({ ...prev, [name]: value }));
+    setPatient((prev) => ({
+      ...prev,
+      [name]: name === "age" ? parseInt(value) || 0 : value,
+    }));
   };
 
-  // handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -91,7 +90,6 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
     router.push("/patient");
   };
 
-  // loading UI
   if (loading) {
     return (
       <div className="text-center py-10 font-semibold">Loading patient...</div>
@@ -141,7 +139,7 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
         >
-          {isEditMode ? "Edit Patient" : "Create Patient"}
+          {isEditMode ? "Update Patient" : "Create Patient"}
         </button>
       </form>
     </div>

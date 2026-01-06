@@ -27,18 +27,21 @@ interface Appointment {
 export default function Page() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchAppointments = async () => {
       try {
-        const res = await http.get<Appointment[]>("/appointments");
-        console.log(res.data.data);
-        setAppointments(res.data.data);
+        const res = await http.get("/appointments");
+        setAppointments(res.data.data || []);
       } catch (error) {
-        console.error("Failed to fetch doctors", error);
+        console.error("Failed to fetch appointments", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDoctors();
+    fetchAppointments();
   }, []);
 
   const ITEMS_PER_PAGE = 4;
@@ -59,12 +62,26 @@ export default function Page() {
     if (!confirm("Are you sure you want to delete this appointment?")) return;
 
     try {
-      await http.delete(`/appointments/${id.trim()}`);
+      await http.delete(`/appointments/${id}`);
       setAppointments((prev) => prev.filter((d) => d._id !== id));
     } catch (error) {
       console.error("Delete failed", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Navbar onLogout={() => console.log("logout")} />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="text-center">Loading appointments...</div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -73,8 +90,8 @@ export default function Page() {
       <div className="flex flex-1">
         <Sidebar />
 
-        <main className="flex-1 p-6 ">
-          <div className="max-w-7xl mx-auto ">
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Appointment Management
@@ -88,7 +105,7 @@ export default function Page() {
               </Link>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden ">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                   <tr>
@@ -97,6 +114,7 @@ export default function Page() {
                     <th className="text-left px-6 py-4">Date</th>
                     <th className="text-left px-6 py-4">Time Slot</th>
                     <th className="text-left px-6 py-4">Reason</th>
+                    <th className="text-left px-6 py-4">Status</th>
                     <th className="text-right px-6 py-4">Actions</th>
                   </tr>
                 </thead>
@@ -125,6 +143,21 @@ export default function Page() {
 
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                         {appt.reason || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                            ${
+                              appt.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                : appt.status === "approved"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
+                            }
+                          `}
+                        >
+                          {appt.status}
+                        </span>
                       </td>
 
                       <td className="px-6 py-4 text-right">

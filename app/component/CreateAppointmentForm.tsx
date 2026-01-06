@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import http from "@/services/http";
 import { useRouter } from "next/navigation";
 
@@ -52,7 +51,6 @@ export default function CreateEditAppointmentForm({
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(id);
 
-  // 🟢 Fetch appointment when ID exists
   useEffect(() => {
     const fetchDocter = async () => {
       try {
@@ -100,7 +98,6 @@ export default function CreateEditAppointmentForm({
     fetchAppointment();
   }, [id]);
 
-  // handle change
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -110,7 +107,6 @@ export default function CreateEditAppointmentForm({
     setAppointment((prev) => ({ ...prev, [name]: value }));
   };
 
-  // handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -143,7 +139,6 @@ export default function CreateEditAppointmentForm({
     router.push("/apointment");
   };
 
-  // loading UI
   if (loading) {
     return (
       <div className="text-center py-10 font-semibold">
@@ -228,7 +223,6 @@ export default function CreateEditAppointmentForm({
           placeholder="Reason"
           className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           rows={3}
-          required
         />
         <select
           name="status"
