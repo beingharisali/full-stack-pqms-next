@@ -8,27 +8,27 @@ export async function login(
   const res = await http.post("/auth/login", { email, password });
   return res.data;
 }
+
 export async function register(
   firstname: string,
   lastname: string,
   email: string,
   password: string,
   role: string
-
 ): Promise<{ user: User; token: string }> {
-  const res = await http.post("/auth/register", { firstname, lastname, email, password, role });
+  const res = await http.post("/auth/register", {
+    firstname,
+    lastname,
+    email,
+    password,
+    role,
+  });
   return res.data;
 }
 
-// export async function getProfile(): Promise<{ user: User } | null> {
-//   try {
-//     const res = await http.get("/auth/profile");
-//     return res.data;
-//   } catch {
-//     return null;
-//   }
-// }
-
 export async function logoutApi(): Promise<void> {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  delete http.defaults.headers.common["Authorization"];
 }

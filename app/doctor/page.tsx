@@ -6,7 +6,6 @@ import Navbar from "../component/navbar";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { deleteDoctor, getAllDoctors } from "@/services/doctor";
 import http from "@/services/http";
 
 export type Availability = "morning" | "afternoon" | "evening";
@@ -17,57 +16,6 @@ export interface Doctor {
   specialization: string;
   availability: Availability;
 }
-
-// const doctor: Doctor[] = [
-//   {
-//     _id: "1",
-//     name: "Dr Ahmed Khan",
-//     specialization: "Cardiology",
-//     availability: "morning",
-//   },
-//   {
-//     _id: "2",
-//     name: "Dr Sara Malik",
-//     specialization: "Dermatology",
-//     availability: "afternoon",
-//   },
-//   {
-//     _id: "3",
-//     name: "Dr Usman Ali",
-//     specialization: "Orthopedics",
-//     availability: "evening",
-//   },
-//   {
-//     _id: "4",
-//     name: "Dr Ayesha Noor",
-//     specialization: "Pediatrics",
-//     availability: "morning",
-//   },
-//   {
-//     _id: "5",
-//     name: "Dr Hamza Sheikh",
-//     specialization: "Neurology",
-//     availability: "afternoon",
-//   },
-//   {
-//     _id: "6",
-//     name: "Dr Fatima Zahra",
-//     specialization: "Gynecology",
-//     availability: "evening",
-//   },
-//   {
-//     _id: "7",
-//     name: "Dr Bilal Hussain",
-//     specialization: "ENT",
-//     availability: "morning",
-//   },
-//   {
-//     _id: "8",
-//     name: "Dr Maria Khan",
-//     specialization: "Ophthalmology",
-//     availability: "afternoon",
-//   },
-// ];
 
 export default function Page() {
   const router = useRouter();
@@ -111,7 +59,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar onLogout={() => console.log("logout")} />
+      <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />

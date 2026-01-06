@@ -3,35 +3,54 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutDashboard, UserCog, Users, CalendarCheck } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   const links = [
-    { name: "ADMIN", href: "/admin" },
-    { name: "DOCTOR", href: "/doctor" },
-    { name: "PATIENT", href: "/patient" },
-    { name: "APOINTMENT", href: "/apointment" },
+    { name: "Admin", href: "/admin", icon: LayoutDashboard },
+    { name: "Doctor", href: "/doctor", icon: UserCog },
+    { name: "Patient", href: "/patient", icon: Users },
+    { name: "Appointment", href: "/apointment", icon: CalendarCheck },
   ];
 
+  const activePage =
+    links.find((link) => pathname.startsWith(link.href))?.name || "Dashboard";
+
   return (
-    <div className="w-48 bg-gray-900 text-white h-screen p-4 shadow-md">
-      <h1 className="text-xl font-bold mb-6 text-center">Menu</h1>
-      <nav className="flex flex-col gap-3">
-        {links.map((link) => (
-          <Link
-            key={link.name}
-            href={link.href}
-            className={`px-4 py-2 rounded-lg text-center font-medium transition-colors ${
-              pathname === link.href
-                ? "bg-white text-gray-900"
-                : "hover:bg-gray-700 hover:text-white"
-            }`}
-          >
-            {link.name}
-          </Link>
-        ))}
+    <aside className="w-64 h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-100 shadow-2xl border-r-white ">
+      {/* Header */}
+      <div className="h-16 flex items-center justify-center border-b border-gray-700">
+        <h1 className="text-xl font-bold tracking-wide text-white border-b-2 border-blue-600">
+          {activePage}
+        </h1>
+      </div>
+
+      {/* Navigation */}
+      <nav className="mt-6 px-3 space-y-1">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href;
+
+          return (
+            <Link
+              key={link.name}
+              href={link.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-white text-gray-900 shadow-lg"
+                    : "text-gray-300 hover:bg-gray-700/60 hover:text-white"
+                }
+              `}
+            >
+              <Icon size={20} />
+              {link.name}
+            </Link>
+          );
+        })}
       </nav>
-    </div>
+    </aside>
   );
 }

@@ -1,4 +1,5 @@
 export type UserRole = "admin" | "doctor" | "receptionist";
+
 export interface User {
   id?: string;
   firstname: string;
@@ -9,6 +10,7 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
 }
+
 export interface AuthResponse {
   user: User;
   token: string;

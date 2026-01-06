@@ -76,7 +76,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar onLogout={() => console.log("logout")} />
+      <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />

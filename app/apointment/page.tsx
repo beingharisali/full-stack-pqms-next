@@ -28,7 +28,7 @@ export default function Page() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -85,7 +85,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar onLogout={() => console.log("logout")} />
+      <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />
@@ -143,6 +143,21 @@ export default function Page() {
 
                       <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                         {appt.reason || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                            ${
+                              appt.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                : appt.status === "approved"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
+                            }
+                          `}
+                        >
+                          {appt.status}
+                        </span>
                       </td>
 
                       <td className="px-6 py-4 text-right">
