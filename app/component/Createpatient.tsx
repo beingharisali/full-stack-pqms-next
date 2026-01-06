@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 interface Patient {
   name: string;
-  age: string;
+  age: number | "";
   history: string;
 }
 
@@ -116,11 +116,13 @@ export default function CreateEditPatientForm({ id }: CreateEditPatientProps) {
         />
 
         <input
-          type="text"
+          type="number"
           name="age"
           placeholder="Age"
           value={patient.age}
           onChange={handleChange}
+          max={150}
+          min={0}
           className="w-full border dark:border-gray-700 px-3 py-2 rounded-lg dark:bg-gray-800 outline-0"
           required
         />

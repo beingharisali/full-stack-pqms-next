@@ -16,28 +16,6 @@ interface Patient {
 }
 
 export default function Page() {
-  const patient: Patient[] = [
-    { _id: "1", name: "Ali Khan", age: "28", history: "Diabetes for 3 years" },
-    { _id: "2", name: "Sara Ahmed", age: "34", history: "High blood pressure" },
-    {
-      _id: "3",
-      name: "Usman Raza",
-      age: "45",
-      history: "Asthma since childhood",
-    },
-    {
-      _id: "4",
-      name: "Ayesha Malik",
-      age: "26",
-      history: "No previous medical history",
-    },
-    {
-      _id: "5",
-      name: "Hassan Ali",
-      age: "52",
-      history: "Heart surgery in 2021",
-    },
-  ];
   const router = useRouter();
   const [patients, setPatients] = useState<Patient[]>([]);
   useEffect(() => {
@@ -80,7 +58,7 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Navbar onLogout={() => console.log("logout")} />
+      <Navbar />
 
       <div className="flex flex-1">
         <Sidebar />

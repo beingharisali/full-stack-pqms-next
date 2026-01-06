@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@/types/user";
+import http from "@/services/http";
 
 interface AuthContextType {
   user: User | null;
@@ -22,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
@@ -32,15 +33,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const setAuth = (user: User, token: string) => {
     setUser(user);
     setToken(token);
+
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
+
+    // 🔥 axios ko updated token do
+    http.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    delete http.defaults.headers.common["Authorization"];
   };
 
   return (
@@ -60,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
