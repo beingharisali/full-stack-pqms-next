@@ -21,6 +21,7 @@ export interface Doctor {
 export default function Page() {
   const router = useRouter();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -38,9 +39,19 @@ export default function Page() {
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(doctors.length / ITEMS_PER_PAGE);
+
+  const filteredDoctors = doctors.filter(
+    (doctor) =>
+      doctor.name.toLowerCase().includes(search.toLowerCase()) ||
+      doctor.specialization.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredDoctors.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentDoctors = doctors.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentDoctors = filteredDoctors.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
 
   const handleEdit = (id: string) => {
     router.push(`/doctor/createdocter/${id}`);
@@ -71,12 +82,28 @@ export default function Page() {
                 Doctor Management
               </h1>
 
-              <Link href="/doctor/createdocter">
-                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
-                  <Plus size={18} />
-                  Create Doctor
-                </button>
-              </Link>
+              <div className="flex gap-4 w-full sm:w-auto">
+                {/* Search Bar */}
+                <input
+                  type="text"
+                  placeholder="Search doctor or specialization..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1); 
+                  }}
+                  className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
+                  dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <Link href="/doctor/createdocter">
+                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
+                    <Plus size={18} />
+                    Create Doctor
+                  </button>
+                </Link>
+              </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
@@ -91,6 +118,17 @@ export default function Page() {
                 </thead>
 
                 <tbody>
+                  {currentDoctors.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center py-10 text-gray-500 dark:text-gray-400"
+                      >
+                        No doctors found
+                      </td>
+                    </tr>
+                  )}
+
                   {currentDoctors.map((doctor) => (
                     <tr
                       key={doctor._id}
@@ -116,7 +154,7 @@ export default function Page() {
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                            ${doctor.availability === "morning"
+                          ${doctor.availability === "morning"
                               ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
                               : doctor.availability === "afternoon"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"

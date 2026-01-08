@@ -17,14 +17,8 @@ interface Doctor {
 
 interface Appointment {
     _id: string;
-    patient: {
-        _id: string;
-        name: string;
-    };
-    doctor: {
-        _id: string;
-        name: string;
-    };
+    patient: { _id: string; name: string };
+    doctor: { _id: string; name: string };
     appointmentDate: string;
     timeSlot: string;
     reason: string;
@@ -43,8 +37,9 @@ export default function ReceptionistDashboard() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
-    // Fetch doctors, appointments, patients
+    // Fetch data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -67,10 +62,23 @@ export default function ReceptionistDashboard() {
         fetchData();
     }, []);
 
+    // Filters
+    const filteredDoctors = doctors.filter((d) =>
+        d.name.toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredPatients = patients.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredAppointments = appointments.filter(
+        (a) =>
+            a.patient.name.toLowerCase().includes(search.toLowerCase()) ||
+            a.doctor.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     if (loading) {
         return (
             <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-                <Navbar onLogout={() => console.log("logout")} />
+                <Navbar />
                 <div className="flex flex-1">
                     <Sidebar />
                     <main className="flex-1 p-6 flex items-center justify-center">
@@ -85,14 +93,15 @@ export default function ReceptionistDashboard() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-            <Navbar onLogout={() => console.log("logout")} />
+            <Navbar />
 
             <div className="flex flex-1">
                 <Sidebar />
 
                 <main className="flex-1 p-6">
                     <div className="max-w-7xl mx-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                        {/* Header + Buttons */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                 Receptionist Dashboard
                             </h1>
@@ -113,6 +122,19 @@ export default function ReceptionistDashboard() {
                             </div>
                         </div>
 
+                        {/* Search Bar Below Buttons */}
+                        <div className="mb-8">
+                            <input
+                                type="text"
+                                placeholder="Search doctors, patients, appointments..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full sm:w-96 px-4 py-3 rounded-xl border border-gray-300
+                dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
                         {/* Doctors Table */}
                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden mb-8">
                             <h2 className="px-6 py-4 font-semibold text-gray-800 dark:text-gray-100">
@@ -127,15 +149,18 @@ export default function ReceptionistDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {doctors.length === 0 ? (
+                                    {filteredDoctors.length === 0 ? (
                                         <tr>
                                             <td colSpan={3} className="text-center py-6 text-gray-500 dark:text-gray-300">
                                                 No doctors found
                                             </td>
                                         </tr>
                                     ) : (
-                                        doctors.map((doctor) => (
-                                            <tr key={doctor._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                        filteredDoctors.map((doctor) => (
+                                            <tr
+                                                key={doctor._id}
+                                                className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                            >
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{doctor.name}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{doctor.specialization}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{doctor.availability || "Not set"}</td>
@@ -160,15 +185,18 @@ export default function ReceptionistDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {patients.length === 0 ? (
+                                    {filteredPatients.length === 0 ? (
                                         <tr>
                                             <td colSpan={3} className="text-center py-6 text-gray-500 dark:text-gray-300">
                                                 No patients found
                                             </td>
                                         </tr>
                                     ) : (
-                                        patients.map((patient) => (
-                                            <tr key={patient._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                        filteredPatients.map((patient) => (
+                                            <tr
+                                                key={patient._id}
+                                                className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                            >
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{patient.name}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{patient.email}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{patient.phone}</td>
@@ -196,30 +224,35 @@ export default function ReceptionistDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {appointments.length === 0 ? (
+                                    {filteredAppointments.length === 0 ? (
                                         <tr>
                                             <td colSpan={6} className="text-center py-6 text-gray-500 dark:text-gray-300">
                                                 No appointments found
                                             </td>
                                         </tr>
                                     ) : (
-                                        appointments.map((appt) => (
-                                            <tr key={appt._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                        filteredAppointments.map((appt) => (
+                                            <tr
+                                                key={appt._id}
+                                                className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                                            >
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient.name}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor.name}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{new Date(appt.appointmentDate).toLocaleDateString()}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
                                                 <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                                                        ${appt.status === "pending"
-                                                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                                                            : appt.status === "approved"
-                                                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                                                                : appt.status === "completed"
-                                                                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                                                                    : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-                                                        }`}>
+                                                    <span
+                                                        className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                              ${appt.status === "pending"
+                                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                                                : appt.status === "approved"
+                                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                                                    : appt.status === "completed"
+                                                                        ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                                                                        : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                                                            }`}
+                                                    >
                                                         {appt.status}
                                                     </span>
                                                 </td>
@@ -232,7 +265,7 @@ export default function ReceptionistDashboard() {
                     </div>
                 </main>
             </div>
-            <Footer></Footer>
+            <Footer />
         </div>
     );
 }

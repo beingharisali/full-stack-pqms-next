@@ -25,6 +25,9 @@ interface Appointment {
 export default function Page() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState(""); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -41,12 +44,16 @@ export default function Page() {
     fetchAppointments();
   }, []);
 
-  const ITEMS_PER_PAGE = 4;
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  const filteredAppointments = appointments.filter(
+    (appt) =>
+      appt.patient.name.toLowerCase().includes(search.toLowerCase()) ||
+      appt.doctor.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentAppointments = appointments.slice(
+  const currentAppointments = filteredAppointments.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -92,9 +99,24 @@ export default function Page() {
 
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-              Appointment Management
-            </h1>
+            {/* 🔍 Search Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Appointment Management
+              </h1>
+              <input
+                type="text"
+                placeholder="Search by patient or doctor..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1); // Reset page on new search
+                }}
+                className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
+                  dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
               <table className="w-full text-sm">
@@ -126,10 +148,10 @@ export default function Page() {
                         className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                       >
                         <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.patient?.name}
+                          {appt.patient.name}
                         </td>
                         <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                          {appt.doctor?.name}
+                          {appt.doctor.name}
                         </td>
                         <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                           {new Date(appt.appointmentDate).toLocaleDateString()}
