@@ -20,6 +20,7 @@ export default function Page() {
   const router = useRouter();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -39,9 +40,13 @@ export default function Page() {
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(patients.length / ITEMS_PER_PAGE);
+  const filteredPatients = patients.filter((p) =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentPatients = patients.slice(
+  const currentPatients = filteredPatients.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -87,17 +92,33 @@ export default function Page() {
 
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Patient Management
               </h1>
 
-              <Link href="/patient/createpatient">
-                <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl">
-                  <Plus size={18} />
-                  Create Patient
-                </button>
-              </Link>
+              <div className="flex gap-4 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder="Search patient..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
+                    dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                    focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <Link href="/patient/createpatient">
+                  <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl">
+                    <Plus size={18} />
+                    Create Patient
+                  </button>
+                </Link>
+              </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow">
@@ -112,6 +133,17 @@ export default function Page() {
                 </thead>
 
                 <tbody>
+                  {currentPatients.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center py-10 text-gray-500 dark:text-gray-400"
+                      >
+                        No patients found
+                      </td>
+                    </tr>
+                  )}
+
                   {currentPatients.map((patient) => (
                     <tr
                       key={patient._id}

@@ -29,6 +29,7 @@ export default function Page() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState(""); // 🔍 Search state
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -48,9 +49,15 @@ export default function Page() {
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
+  const filteredAppointments = appointments.filter(
+    (appt) =>
+      appt.patient.name.toLowerCase().includes(search.toLowerCase()) ||
+      appt.doctor.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentAppointments = appointments.slice(
+  const currentAppointments = filteredAppointments.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -93,17 +100,34 @@ export default function Page() {
 
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
+        
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Appointment Management
               </h1>
 
-              <Link href="/apointment/createapointment">
-                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
-                  <Plus size={18} />
-                  Create Appointment
-                </button>
-              </Link>
+              <div className="flex gap-4 w-full sm:w-auto">
+                {/* Search Bar */}
+                <input
+                  type="text"
+                  placeholder="Search patient or doctor..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1); 
+                  }}
+                  className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
+                  dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <Link href="/apointment/createapointment">
+                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
+                    <Plus size={18} />
+                    Create Appointment
+                  </button>
+                </Link>
+              </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
@@ -121,6 +145,17 @@ export default function Page() {
                 </thead>
 
                 <tbody>
+                  {currentAppointments.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="text-center py-10 text-gray-500 dark:text-gray-400"
+                      >
+                        No appointments found
+                      </td>
+                    </tr>
+                  )}
+
                   {currentAppointments.map((appt) => (
                     <tr
                       key={appt._id}
@@ -148,10 +183,9 @@ export default function Page() {
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                            ${
-                              appt.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                                : appt.status === "approved"
+                            ${appt.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                              : appt.status === "approved"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                 : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
                             }
