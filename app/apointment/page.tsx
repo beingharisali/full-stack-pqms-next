@@ -7,6 +7,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
+import Footer from "../component/footer";
 
 interface Appointment {
   _id: string;
@@ -211,6 +212,7 @@ export default function Page() {
           </div>
         </main>
       </div>
+      <Footer></Footer>
     </div>
   );
 }

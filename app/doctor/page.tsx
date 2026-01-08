@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
+import Footer from "../component/footer";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,6 @@ export default function Page() {
     const fetchDoctors = async () => {
       try {
         const res = await http.get<Doctor[]>("/doctors");
-        console.log(res.data.data);
         setDoctors(res.data.data);
       } catch (error) {
         console.error("Failed to fetch doctors", error);
@@ -116,14 +116,12 @@ export default function Page() {
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                            ${
-                              doctor.availability === "morning"
-                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                                : doctor.availability === "afternoon"
+                            ${doctor.availability === "morning"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                              : doctor.availability === "afternoon"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                 : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
-                            }
-                          `}
+                            }`}
                         >
                           {doctor.availability}
                         </span>
@@ -158,10 +156,7 @@ export default function Page() {
                   <button
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => p - 1)}
-                    className="px-4 py-2 border rounded-lg text-sm
-                      disabled:opacity-50
-                      text-gray-700 dark:text-gray-200
-                      hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
                   >
                     Previous
                   </button>
@@ -173,10 +168,7 @@ export default function Page() {
                   <button
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    className="px-4 py-2 border rounded-lg text-sm
-                      disabled:opacity-50
-                      text-gray-700 dark:text-gray-200
-                      hover:bg-gray-100 dark:hover:bg-gray-600"
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
                   >
                     Next
                   </button>
@@ -186,6 +178,8 @@ export default function Page() {
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

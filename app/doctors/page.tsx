@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
+import Footer from "../component/footer";
 import http from "@/services/http";
 
 interface Appointment {
@@ -50,7 +51,10 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
+  const handleStatusChange = async (
+    id: string,
+    newStatus: Appointment["status"]
+  ) => {
     try {
       await http.put(`/appointments/${id}`, { status: newStatus });
       setAppointments((prev) =>
@@ -66,12 +70,15 @@ export default function Page() {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
+
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">Loading appointments...</div>
           </main>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -105,7 +112,10 @@ export default function Page() {
                 <tbody>
                   {currentAppointments.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-6 text-gray-500 dark:text-gray-300">
+                      <td
+                        colSpan={6}
+                        className="text-center py-6 text-gray-500 dark:text-gray-300"
+                      >
                         No appointments found
                       </td>
                     </tr>
@@ -115,18 +125,29 @@ export default function Page() {
                         key={appt._id}
                         className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                       >
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient?.name}</td>
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor?.name}</td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                          {appt.patient?.name}
+                        </td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                          {appt.doctor?.name}
+                        </td>
                         <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                           {new Date(appt.appointmentDate).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
-                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                          {appt.timeSlot}
+                        </td>
+                        <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                          {appt.reason || "-"}
+                        </td>
                         <td className="px-6 py-4">
                           <select
                             value={appt.status}
                             onChange={(e) =>
-                              handleStatusChange(appt._id, e.target.value as Appointment["status"])
+                              handleStatusChange(
+                                appt._id,
+                                e.target.value as Appointment["status"]
+                              )
                             }
                             className={`px-3 py-1 rounded-full text-xs font-medium capitalize cursor-pointer
                               ${appt.status === "pending"
@@ -177,6 +198,8 @@ export default function Page() {
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

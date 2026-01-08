@@ -6,6 +6,7 @@ import Navbar from "../component/navbar";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import http from "@/services/http";
+import Footer from "../component/footer";
 
 interface Doctor {
     _id: string;
@@ -231,6 +232,7 @@ export default function ReceptionistDashboard() {
                     </div>
                 </main>
             </div>
+            <Footer></Footer>
         </div>
     );
 }

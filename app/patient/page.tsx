@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../component/sidebar";
 import Navbar from "../component/navbar";
+import Footer from "../component/footer";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ export default function Page() {
   const router = useRouter();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -34,7 +35,7 @@ export default function Page() {
 
     fetchPatients();
   }, []);
-  
+
   const ITEMS_PER_PAGE = 4;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -54,7 +55,7 @@ export default function Page() {
 
     try {
       await http.delete(`/patients/${id}`);
-      setPatients((prev) => prev.filter((d) => d._id !== id));
+      setPatients((prev) => prev.filter((p) => p._id !== id));
     } catch (error) {
       console.error("Delete failed", error);
     }
@@ -64,12 +65,15 @@ export default function Page() {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar onLogout={() => console.log("logout")} />
+
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
             <div className="text-center">Loading patients...</div>
           </main>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -175,6 +179,8 @@ export default function Page() {
           </div>
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }
