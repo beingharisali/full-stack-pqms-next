@@ -18,27 +18,36 @@ interface Patient {
 
 export default function Page() {
   const router = useRouter();
+
   const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "age" | "">("");
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 5;
+
+  
+  const fetchPatients = async () => {
+    try {
+      const params: any = {};
+      if (sortBy) {
+        params.sortBy = sortBy;
+        params.order = order;
+      }
+
+      const res = await http.get("/patients", { params });
+      setPatients(res.data.data || []);
+      setCurrentPage(1);
+    } catch (err) {
+      console.error("Failed to fetch patients", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const res = await http.get("/patients");
-        setPatients(res.data.data || []);
-      } catch (error) {
-        console.error("Failed to fetch patients", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPatients();
-  }, []);
+  }, [sortBy, order]);
 
-  const ITEMS_PER_PAGE = 4;
-  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -51,83 +60,73 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const handleEdit = (id: string) => {
-    router.push(`/patient/createpatient/${id}`);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this patient?")) return;
-
-    try {
-      await http.delete(`/patients/${id}`);
-      setPatients((prev) => prev.filter((p) => p._id !== id));
-    } catch (error) {
-      console.error("Delete failed", error);
+  const handleSortChange = (value: string) => {
+    if (!value) {
+      setSortBy("");
+      return;
     }
+
+    const [field, ord] = value.split("_");
+    setSortBy(field as "name" | "age");
+    setOrder(ord as "asc" | "desc");
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Navbar onLogout={() => console.log("logout")} />
-
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">Loading patients...</div>
-          </main>
-        </div>
-
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar />
-
       <div className="flex flex-1">
         <Sidebar />
 
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
 
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 Patient Management
               </h1>
 
-              <div className="flex gap-4 w-full sm:w-auto">
+              <div className="flex gap-4 flex-wrap">
+                {/* Search */}
                 <input
                   type="text"
-                  placeholder="Search patient..."
+                  placeholder="Search patient name..."
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
-                    dark:border-gray-600 dark:bg-gray-800 dark:text-white
-                    focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-3 w-64 rounded-xl border dark:bg-gray-800 dark:text-white"
                 />
 
+                {/* Sort */}
+                <select
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="px-4 py-3 rounded-xl border dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="">Sort By</option>
+                  <option value="name_asc">Name (A → Z)</option>
+                  <option value="name_desc">Name (Z → A)</option>
+                  <option value="age_asc">Age (Low → High)</option>
+                  <option value="age_desc">Age (High → Low)</option>
+                </select>
+
                 <Link href="/patient/createpatient">
-                  <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl">
-                    <Plus size={18} />
-                    Create Patient
+                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl">
+                    <Plus size={18} /> Create Patient
                   </button>
                 </Link>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow">
+            {/* Table */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="text-left px-6 py-4">PATIENT</th>
+                    <th className="text-left px-6 py-4">NAME</th>
                     <th className="text-left px-6 py-4">AGE</th>
-                    <th className="text-left px-6 py-4">MEDICAL HISTORY</th>
+                    <th className="text-left px-6 py-4">HISTORY</th>
                     <th className="text-right px-6 py-4">ACTIONS</th>
                   </tr>
                 </thead>
@@ -135,49 +134,27 @@ export default function Page() {
                 <tbody>
                   {currentPatients.length === 0 && (
                     <tr>
-                      <td
-                        colSpan={4}
-                        className="text-center py-10 text-gray-500 dark:text-gray-400"
-                      >
+                      <td colSpan={4} className="text-center py-10 text-gray-500">
                         No patients found
                       </td>
                     </tr>
                   )}
 
-                  {currentPatients.map((patient) => (
-                    <tr
-                      key={patient._id}
-                      className="border-b dark:hover:bg-gray-700 transition"
-                    >
-                      <td className="px-6 py-4 flex items-center gap-3">
-                        <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-semibold">
-                          {patient.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </div>
-                        {patient.name}
-                      </td>
-
-                      <td className="px-6 py-4">{patient.age}</td>
-                      <td className="px-6 py-4">{patient.history}</td>
-
+                  {currentPatients.map((p) => (
+                    <tr key={p._id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="px-6 py-4">{p.name}</td>
+                      <td className="px-6 py-4">{p.age}</td>
+                      <td className="px-6 py-4">{p.history}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
                           <button
-                            onClick={() => handleEdit(patient._id)}
+                            onClick={() => router.push(`/patient/createpatient/${p._id}`)}
                             className="text-blue-600 flex items-center gap-1"
                           >
-                            <Pencil size={16} />
-                            Edit
+                            <Pencil size={16} /> Edit
                           </button>
-
-                          <button
-                            onClick={() => handleDelete(patient._id)}
-                            className="text-red-600 flex items-center gap-1"
-                          >
-                            <Trash2 size={16} />
-                            Delete
+                          <button className="text-red-600 flex items-center gap-1">
+                            <Trash2 size={16} /> Delete
                           </button>
                         </div>
                       </td>
@@ -186,32 +163,29 @@ export default function Page() {
                 </tbody>
               </table>
 
+              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex justify-between px-6 py-4">
                   <button
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => p - 1)}
+                    onClick={() => setCurrentPage(p => p - 1)}
                   >
                     Previous
                   </button>
-
-                  <span>
-                    Page {currentPage} of {totalPages}
-                  </span>
-
+                  <span>Page {currentPage} of {totalPages}</span>
                   <button
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => p + 1)}
+                    onClick={() => setCurrentPage(p => p + 1)}
                   >
                     Next
                   </button>
                 </div>
               )}
             </div>
+
           </div>
         </main>
       </div>
-
       <Footer />
     </div>
   );
