@@ -3,20 +3,27 @@ import React from "react";
 import Navbar from "../component/navbar";
 import Sidebar from "../component/sidebar";
 import AdminDashboard from "../component/dashboard";
+import Footer from "../component/footer";
 
-function page() {
+function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+
+      {/* Navbar */}
       <Navbar onLogout={() => console.log("logout")} />
 
+      {/* Page Content */}
       <div className="flex flex-1">
         <Sidebar />
-        <main className=" flex-1 p-6">
+        <main className="flex-1 p-6">
           <AdminDashboard />
         </main>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
 
-export default page;
+export default Page;
