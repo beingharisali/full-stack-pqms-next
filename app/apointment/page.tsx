@@ -7,9 +7,6 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
-import { FiSearch } from "react-icons/fi";
-import { MdOutlineSort } from "react-icons/md";
-
 
 interface Appointment {
   _id: string;
@@ -42,9 +39,6 @@ export default function Page() {
   const [sort, setSort] = useState<"date" | "patient" | "doctor">("date");
   const [doctor, setDoctor] = useState("");
 
-  const ITEMS_PER_PAGE = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-
 
   const fetchDoctors = async () => {
     try {
@@ -55,13 +49,24 @@ export default function Page() {
     }
   };
 
-  // Fetch appointments 
+  useEffect(() => {
+    fetchDoctors();
+  }, []);
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
         setLoading(true);
-        const res = await http.get("/appointments");
+        const res = await http.get("/appointments", {
+          params: {
+            search: "",
+            status,
+            doctor,
+            sort,
+          },
+        });
         setAppointments(res.data.data || []);
+        console.log(res.data.data);
         setCurrentPage(1);
       } catch (error) {
         console.error("Failed to fetch appointments", error);
@@ -70,34 +75,15 @@ export default function Page() {
       }
     };
 
-    fetchDoctors();
     fetchAppointments();
-  }, []);
+  }, [status, doctor, sort]);
 
-  // sort?
-  const filteredAppointments = appointments
-    .filter((appt) => {
-      const matchesSearch = appt.patient.name
-        .toLowerCase()
-        .includes(search.toLowerCase());
-      const matchesStatus = status ? appt.status === status : true;
-      const matchesDoctor = doctor ? appt.doctor._id === doctor : true;
-      return matchesSearch && matchesStatus && matchesDoctor;
-    })
-    .sort((a, b) => {
-      if (sort === "date") {
-        return new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime();
-      } else if (sort === "patient") {
-        return a.patient.name.localeCompare(b.patient.name);
-      } else if (sort === "doctor") {
-        return a.doctor.name.localeCompare(b.doctor.name);
-      }
-      return 0;
-    });
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(appointments.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentAppointments = filteredAppointments.slice(
+  const currentAppointments = appointments.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -108,6 +94,7 @@ export default function Page() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this appointment?")) return;
+
     try {
       await http.delete(`/appointments/${id}`);
       setAppointments((prev) => prev.filter((d) => d._id !== id));
@@ -119,7 +106,7 @@ export default function Page() {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Navbar />
+        <Navbar onLogout={() => console.log("logout")} />
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
@@ -133,182 +120,74 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar />
+
       <div className="flex flex-1">
         <Sidebar />
+
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 ">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Appointment Management
               </h1>
+
               <Link href="/apointment/createapointment">
-                <button
-                  className="
-    flex items-center justify-center gap-2
-    bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold
-    px-6 py-3 rounded-xl
-    shadow-md hover:shadow-lg
-    transition-all duration-200 ease-in-out
-    hover:from-blue-300 hover:to-blue-700 active:from-blue-700 active:to-blue-800
-    transform hover:-translate-y-0.5
-    focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
-  "
-                >
+                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
                   <Plus size={18} />
                   Create Appointment
                 </button>
               </Link>
             </div>
-
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               {/* Search */}
-              <div className="relative w-full md:w-1/3 group">
-                <FiSearch
-                  size={18}
-                  className="
-        absolute left-3 top-1/2 -translate-y-1/2
-        text-gray-400 dark:text-gray-300
-        pointer-events-none
-        transition-colors duration-200
-        group-focus-within:text-blue-500
-      "
-                />
-                <input
-                  type="text"
-                  placeholder="Search patient name..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="
-        w-full pl-10 pr-4 py-2
-        rounded-lg border
-        bg-white dark:bg-gray-700
-        border-gray-300 dark:border-gray-600
-        text-gray-700 dark:text-white
-        placeholder-gray-400
-        transition-all duration-200 ease-in-out
-        hover:border-blue-500 hover:shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-      "
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Search patient name"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="px-4 py-2 border rounded-lg w-full md:w-1/3 dark:bg-gray-700 dark:border-gray-600"
+              />
 
               {/* Status Filter */}
-              <div className="relative w-full md:w-1/4 group">
-                <MdOutlineSort
-                  size={20}
-                  className="
-        absolute left-3 top-1/2 -translate-y-1/2
-        text-gray-400 dark:text-gray-300
-        pointer-events-none
-        transition-colors duration-200
-        group-focus-within:text-blue-500
-      "
-                />
-                <select
-                  value={status}
-                  onChange={(e) => {
-                    setStatus(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="
-        w-full pl-10 pr-4 py-2
-        rounded-lg border
-        bg-white dark:bg-gray-700
-        border-gray-300 dark:border-gray-600
-        text-gray-700 dark:text-white
-        transition-all duration-200 ease-in-out
-        hover:border-blue-500 hover:shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-        cursor-pointer
-      "
-                >
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
+              >
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
 
-              {/* Doctor Filter */}
-              <div className="relative w-full md:w-1/4 group">
-                <MdOutlineSort
-                  size={20}
-                  className="
-        absolute left-3 top-1/2 -translate-y-1/2
-        text-gray-400 dark:text-gray-300
-        pointer-events-none
-        transition-colors duration-200
-        group-focus-within:text-blue-500
-      "
-                />
-                <select
-                  value={doctor}
-                  onChange={(e) => {
-                    setDoctor(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="
-        w-full pl-10 pr-4 py-2
-        rounded-lg border
-        bg-white dark:bg-gray-700
-        border-gray-300 dark:border-gray-600
-        text-gray-700 dark:text-white
-        transition-all duration-200 ease-in-out
-        hover:border-blue-500 hover:shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-        cursor-pointer
-      "
-                >
-                  <option value="">All Doctors</option>
-                  {doctors.map((doc) => (
-                    <option key={doc._id} value={doc._id}>
-                      {doc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
+              {/* Doctor Filter (simple for now) */}
+              <select
+                value={doctor}
+                onChange={(e) => setDoctor(e.target.value)}
+                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
+              >
+                <option value="">All Doctors</option>
+                {doctors.map((doc) => (
+                  <option key={doc._id} value={doc._id}>
+                    {doc.name}
+                  </option>
+                ))}
+              </select>
               {/* Sort */}
-              <div className="relative w-full md:w-1/4 group">
-                <MdOutlineSort
-                  size={20}
-                  className="
-        absolute left-3 top-1/2 -translate-y-1/2
-        text-gray-400 dark:text-gray-300
-        pointer-events-none
-        transition-colors duration-200
-        group-focus-within:text-blue-500
-      "
-                />
-                <select
-                  value={sort}
-                  onChange={(e) =>
-                    setSort(e.target.value as "date" | "patient" | "doctor")
-                  }
-                  className="
-        w-full pl-10 pr-4 py-2
-        rounded-lg border
-        bg-white dark:bg-gray-700
-        border-gray-300 dark:border-gray-600
-        text-gray-700 dark:text-white
-        transition-all duration-200 ease-in-out
-        hover:border-blue-500 hover:shadow-sm
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-        cursor-pointer
-      "
-                >
-                  <option value="date">Sort by Date</option>
-                  <option value="patient">Sort by Patient Name</option>
-                  <option value="doctor">Sort by Doctor Name</option>
-                </select>
-              </div>
+              <select
+                value={sort}
+                onChange={(e) =>
+                  setSort(e.target.value as "date" | "patient" | "doctor")
+                }
+                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
+              >
+                <option value="date">Sort by Date</option>
+                <option value="patient">Sort by Patient Name</option>
+                <option value="doctor">Sort by Doctor Name</option>
+              </select>
             </div>
 
-            {/* Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
@@ -324,21 +203,30 @@ export default function Page() {
                 </thead>
 
                 <tbody>
-                  {currentAppointments.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="text-center py-10 text-gray-500 dark:text-gray-400">
-                        No appointments found
-                      </td>
-                    </tr>
-                  )}
-
                   {currentAppointments.map((appt) => (
-                    <tr key={appt._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient?.name}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor?.name}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{new Date(appt.appointmentDate).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>
+                    <tr
+                      key={appt._id}
+                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    >
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.patient?.name}
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.doctor?.name}
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {new Date(appt.appointmentDate).toLocaleDateString()}
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.timeSlot}
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.reason || "-"}
+                      </td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
@@ -347,15 +235,30 @@ export default function Page() {
                               : appt.status === "approved"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                 : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
-                            }`}
+                            }
+                          `}
                         >
                           {appt.status}
                         </span>
                       </td>
+
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
-                          <button onClick={() => handleEdit(appt._id)} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"><Pencil size={16} /> Edit</button>
-                          <button onClick={() => handleDelete(appt._id)} className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"><Trash2 size={16} /> Delete</button>
+                          <button
+                            onClick={() => handleEdit(appt._id)}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                          >
+                            <Pencil size={16} />
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(appt._id)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"
+                          >
+                            <Trash2 size={16} />
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -363,12 +266,27 @@ export default function Page() {
                 </tbody>
               </table>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Previous</button>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Page <strong>{currentPage}</strong> of {totalPages}</span>
-                  <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Next</button>
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    Previous
+                  </button>
+
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                    Page <strong>{currentPage}</strong> of {totalPages}
+                  </span>
+
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    Next
+                  </button>
                 </div>
               )}
             </div>
