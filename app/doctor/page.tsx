@@ -8,6 +8,8 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
+import { MdOutlineSort } from "react-icons/md";
+import { MdAccessTime } from "react-icons/md";
 
 export type Availability = "morning" | "afternoon" | "evening";
 
@@ -111,27 +113,77 @@ export default function Page() {
                 className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               />
 
-              <select
-                value={availabilityFilter}
-                onChange={(e) => setAvailabilityFilter(e.target.value)}
-                className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm"
-              >
-                <option value="">All Availability</option>
-                <option value="morning">Morning</option>
-                <option value="afternoon">Afternoon</option>
-                <option value="evening">Evening</option>
-              </select>
+              <div className="flex flex-row justify-end w-full gap-3">
+                {/* Availability Filter */}
+                <div className="relative w-48 group">
+                  {/* Clock Icon */}
+                  <MdAccessTime
+                    size={20}
+                    className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                  />
+                  <select
+                    value={availabilityFilter}
+                    onChange={(e) => setAvailabilityFilter(e.target.value)}
+                    className="
+        w-full pl-10 pr-4 py-3
+        rounded-xl border border-gray-300 dark:border-gray-600
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        shadow-sm
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-md
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        cursor-pointer
+      "
+                  >
+                    <option value="">All Availability</option>
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                    <option value="evening">Evening</option>
+                  </select>
+                </div>
 
-              <select
-                value={sortField}
-                onChange={(e) => handleSortChange(e.target.value as any)}
-                className="px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm"
-              >
-                <option value="">Sort By</option>
-                <option value="name">Name</option>
-                <option value="specialization">Specialization</option>
-                <option value="availability">Availability</option>
-              </select>
+                {/* Sort Filter */}
+                <div className="relative w-48 group">
+                  {/* Sort Icon */}
+                  <MdOutlineSort
+                    size={20}
+                    className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                  />
+                  <select
+                    value={sortField}
+                    onChange={(e) => handleSortChange(e.target.value as any)}
+                    className="
+        w-full pl-10 pr-4 py-3
+        rounded-xl border border-gray-300 dark:border-gray-600
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        shadow-sm
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-md
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        cursor-pointer
+      "
+                  >
+                    <option value="">Sort By</option>
+                    <option value="name">Name</option>
+                    <option value="specialization">Specialization</option>
+                    <option value="availability">Availability</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             {/* Table */}

@@ -8,6 +8,10 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
+import { FiSearch } from "react-icons/fi";
+import { MdOutlineSort } from "react-icons/md";
+
+
 
 interface Patient {
   _id: string;
@@ -27,7 +31,7 @@ export default function Page() {
 
   const ITEMS_PER_PAGE = 5;
 
-  
+
   const fetchPatients = async () => {
     try {
       const params: any = {};
@@ -88,6 +92,48 @@ export default function Page() {
 
               <div className="flex gap-4 flex-wrap">
                 {/* Search */}
+
+
+                <Link href="/patient/createpatient">
+                  <button
+                    className="
+    flex items-center justify-center gap-2
+    bg-gradient-to-r from-blue-500 to-blue-500
+    text-white font-semibold
+    px-6 py-3 rounded-xl
+    shadow-md hover:shadow-lg
+    transition-all duration-200 ease-in-out
+    hover:from-blue-300 hover:to-blue-700
+    active:from-green-700 active:to-green-800
+    transform hover:-translate-y-0.5
+    focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2
+  "
+                  >
+                    <Plus
+                      size={18}
+                      className="transition-transform duration-200 group-hover:rotate-12"
+                    />
+                    Create Patient
+                  </button>
+
+                </Link>
+              </div>
+            </div>
+            <div className="mb-3 flex justify-end gap-3">
+              {/* Search */}
+              <div className="relative w-64 group">
+                {/* Search Icon */}
+                <FiSearch
+                  size={18}
+                  className="
+        absolute left-4 top-1/2 -translate-y-1/2
+        text-gray-400
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+        pointer-events-none
+      "
+                />
+
                 <input
                   type="text"
                   placeholder="Search patient name..."
@@ -96,28 +142,74 @@ export default function Page() {
                     setSearch(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="px-4 py-3 w-64 rounded-xl border dark:bg-gray-800 dark:text-white"
+                  className="
+        w-full pl-11 pr-4 py-3
+        rounded-xl border
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        placeholder-gray-400
+
+        border-gray-300 dark:border-gray-700
+        transition-all duration-200 ease-in-out
+
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+      "
+                />
+              </div>
+
+              {/* Sort */}
+              <div className="relative w-56 group">
+                {/* Sort Icon */}
+                <MdOutlineSort
+                  size={20}
+                  className="
+        absolute left-4 top-1/2 -translate-y-1/2
+        text-gray-400
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
                 />
 
-                {/* Sort */}
                 <select
                   onChange={(e) => handleSortChange(e.target.value)}
-                  className="px-4 py-3 rounded-xl border dark:bg-gray-800 dark:text-white"
+                  className="
+        w-full appearance-none
+        pl-11 pr-10 py-3
+        rounded-xl border
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        border-gray-300 dark:border-gray-700
+
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-md
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+
+        cursor-pointer
+      "
                 >
-                  <option value="">Sort By</option>
-                  <option value="name_asc">Name (A → Z)</option>
-                  <option value="name_desc">Name (Z → A)</option>
-                  <option value="age_asc">Age (Low → High)</option>
-                  <option value="age_desc">Age (High → Low)</option>
+                  <option value=" ">SORT BY</option>
+                  <option value="name_asc">A–Z ⬆ Name</option>
+                  <option value="name_desc">Z–A ⬇ Name</option>
+                  <option value="age_asc">⬆ Age</option>
+                  <option value="age_desc">⬇ Age</option>
                 </select>
 
-                <Link href="/patient/createpatient">
-                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl">
-                    <Plus size={18} /> Create Patient
-                  </button>
-                </Link>
+                {/* Dropdown Arrow */}
+                <span
+                  className="
+        pointer-events-none absolute right-4 top-1/2 -translate-y-1/2
+        text-gray-500 dark:text-gray-400
+        transition-transform duration-200
+        group-hover:rotate-180
+      "
+                >
+                  ▼
+                </span>
               </div>
             </div>
+
 
             {/* Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">

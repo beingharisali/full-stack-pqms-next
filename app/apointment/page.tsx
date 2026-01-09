@@ -7,6 +7,9 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
+import { FiSearch } from "react-icons/fi";
+import { MdOutlineSort } from "react-icons/md";
+
 
 interface Appointment {
   _id: string;
@@ -139,70 +142,170 @@ export default function Page() {
                 Appointment Management
               </h1>
               <Link href="/apointment/createapointment">
-                <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
-                  <Plus size={18} /> Create Appointment
+                <button
+                  className="
+    flex items-center justify-center gap-2
+    bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold
+    px-6 py-3 rounded-xl
+    shadow-md hover:shadow-lg
+    transition-all duration-200 ease-in-out
+    hover:from-blue-300 hover:to-blue-700 active:from-blue-700 active:to-blue-800
+    transform hover:-translate-y-0.5
+    focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+  "
+                >
+                  <Plus size={18} />
+                  Create Appointment
                 </button>
               </Link>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               {/* Search */}
-              <input
-                type="text"
-                placeholder="Search patient name..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 border rounded-lg w-full md:w-1/3 dark:bg-gray-700 dark:border-gray-600"
-              />
+              <div className="relative w-full md:w-1/3 group">
+                <FiSearch
+                  size={18}
+                  className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                />
+                <input
+                  type="text"
+                  placeholder="Search patient name..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="
+        w-full pl-10 pr-4 py-2
+        rounded-lg border
+        bg-white dark:bg-gray-700
+        border-gray-300 dark:border-gray-600
+        text-gray-700 dark:text-white
+        placeholder-gray-400
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+      "
+                />
+              </div>
 
               {/* Status Filter */}
-              <select
-                value={status}
-                onChange={(e) => {
-                  setStatus(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
-              >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+              <div className="relative w-full md:w-1/4 group">
+                <MdOutlineSort
+                  size={20}
+                  className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                />
+                <select
+                  value={status}
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="
+        w-full pl-10 pr-4 py-2
+        rounded-lg border
+        bg-white dark:bg-gray-700
+        border-gray-300 dark:border-gray-600
+        text-gray-700 dark:text-white
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        cursor-pointer
+      "
+                >
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
 
               {/* Doctor Filter */}
-              <select
-                value={doctor}
-                onChange={(e) => {
-                  setDoctor(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
-              >
-                <option value="">All Doctors</option>
-                {doctors.map((doc) => (
-                  <option key={doc._id} value={doc._id}>
-                    {doc.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative w-full md:w-1/4 group">
+                <MdOutlineSort
+                  size={20}
+                  className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                />
+                <select
+                  value={doctor}
+                  onChange={(e) => {
+                    setDoctor(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="
+        w-full pl-10 pr-4 py-2
+        rounded-lg border
+        bg-white dark:bg-gray-700
+        border-gray-300 dark:border-gray-600
+        text-gray-700 dark:text-white
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        cursor-pointer
+      "
+                >
+                  <option value="">All Doctors</option>
+                  {doctors.map((doc) => (
+                    <option key={doc._id} value={doc._id}>
+                      {doc.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               {/* Sort */}
-              <select
-                value={sort}
-                onChange={(e) =>
-                  setSort(e.target.value as "date" | "patient" | "doctor")
-                }
-                className="px-4 py-2 border rounded-lg w-full md:w-1/4 dark:bg-gray-700 dark:border-gray-600"
-              >
-                <option value="date">Sort by Date</option>
-                <option value="patient">Sort by Patient Name</option>
-                <option value="doctor">Sort by Doctor Name</option>
-              </select>
+              <div className="relative w-full md:w-1/4 group">
+                <MdOutlineSort
+                  size={20}
+                  className="
+        absolute left-3 top-1/2 -translate-y-1/2
+        text-gray-400 dark:text-gray-300
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
+                />
+                <select
+                  value={sort}
+                  onChange={(e) =>
+                    setSort(e.target.value as "date" | "patient" | "doctor")
+                  }
+                  className="
+        w-full pl-10 pr-4 py-2
+        rounded-lg border
+        bg-white dark:bg-gray-700
+        border-gray-300 dark:border-gray-600
+        text-gray-700 dark:text-white
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        cursor-pointer
+      "
+                >
+                  <option value="date">Sort by Date</option>
+                  <option value="patient">Sort by Patient Name</option>
+                  <option value="doctor">Sort by Doctor Name</option>
+                </select>
+              </div>
             </div>
 
             {/* Table */}
@@ -242,8 +345,8 @@ export default function Page() {
                             ${appt.status === "pending"
                               ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
                               : appt.status === "approved"
-                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                              : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
                             }`}
                         >
                           {appt.status}
@@ -251,8 +354,8 @@ export default function Page() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
-                          <button onClick={() => handleEdit(appt._id)} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"><Pencil size={16}/> Edit</button>
-                          <button onClick={() => handleDelete(appt._id)} className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"><Trash2 size={16}/> Delete</button>
+                          <button onClick={() => handleEdit(appt._id)} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"><Pencil size={16} /> Edit</button>
+                          <button onClick={() => handleDelete(appt._id)} className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"><Trash2 size={16} /> Delete</button>
                         </div>
                       </td>
                     </tr>
