@@ -110,7 +110,10 @@ export default function Page() {
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">Loading appointments...</div>
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
           </main>
         </div>
       </div>
@@ -230,9 +233,10 @@ export default function Page() {
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                            ${appt.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                              : appt.status === "approved"
+                            ${
+                              appt.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                : appt.status === "approved"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                 : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
                             }

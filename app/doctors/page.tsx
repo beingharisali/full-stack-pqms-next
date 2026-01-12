@@ -83,7 +83,10 @@ export default function Page() {
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">Loading appointments...</div>
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
           </main>
         </div>
 
