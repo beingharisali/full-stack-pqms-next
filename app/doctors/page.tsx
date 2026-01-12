@@ -25,7 +25,7 @@ interface Appointment {
 export default function Page() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState(""); 
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 4;
 
@@ -44,7 +44,6 @@ export default function Page() {
     fetchAppointments();
   }, []);
 
-  
   const filteredAppointments = appointments.filter(
     (appt) =>
       appt.patient.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -81,7 +80,10 @@ export default function Page() {
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">Loading appointments...</div>
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
           </main>
         </div>
 
@@ -172,13 +174,14 @@ export default function Page() {
                               )
                             }
                             className={`px-3 py-1 rounded-full text-xs font-medium capitalize cursor-pointer
-                              ${appt.status === "pending"
-                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                                : appt.status === "approved"
+                              ${
+                                appt.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                  : appt.status === "approved"
                                   ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                   : appt.status === "completed"
-                                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                                    : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                                  : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
                               }`}
                           >
                             <option value="pending">pending</option>
