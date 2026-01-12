@@ -10,6 +10,9 @@ const http = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  
+  
+
 });
 
 http.interceptors.request.use((config) => {
