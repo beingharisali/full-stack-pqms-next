@@ -1,29 +1,40 @@
 "use client";
 
+import React, { ReactNode, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import Unauthorized from "./unoth";
 
-type Props = {
-    children: React.ReactNode;
-    role?: "admin" | "doctor" | "receptionist";
-};
+type Role = "admin" | "doctor" | "receptionist";
 
-export default function ProtectedRoute({ children, role }: Props) {
-    const { user, loading } = useAuth();
+interface Props {
+    children: ReactNode;
+    allowedRoles?: Role[]; // roles allowed page
+}
+
+export default function ProtectedRoute({ children, allowedRoles }: Props) {
+    const { user, isAuthenticated } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading) {
-            if (!user) {
-                router.replace("/");
-            } else if (role && user.role !== role) {
-                router.replace("/unauthorized");
-            }
+        if (!isAuthenticated) {
+            router.replace("/");
         }
-    }, [user, loading, role]);
+    }, [isAuthenticated, router]);
 
-    if (loading) return <p>Loading...</p>;
+    if (!isAuthenticated) {
+        return <p className="text-center mt-10">Loading...</p>;
+    }
+
+    // 🔹 Admin can access everything
+    if (user?.role === "admin") {
+        return <>{children}</>;
+    }
+
+
+    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+        return <Unauthorized />;
+    }
 
     return <>{children}</>;
 }

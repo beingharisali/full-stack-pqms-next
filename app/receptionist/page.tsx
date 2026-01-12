@@ -10,91 +10,91 @@ import Footer from "../component/footer";
 import ProtectedRoute from "../component/protectedRoutes";
 
 interface Doctor {
-  _id: string;
-  name: string;
-  specialization: string;
-  availability?: string;
+    _id: string;
+    name: string;
+    specialization: string;
+    availability?: string;
 }
 
 interface Appointment {
-  _id: string;
-  patient: { _id: string; name: string };
-  doctor: { _id: string; name: string };
-  appointmentDate: string;
-  timeSlot: string;
-  reason: string;
-  status: "pending" | "approved" | "completed" | "cancelled";
+    _id: string;
+    patient: { _id: string; name: string };
+    doctor: { _id: string; name: string };
+    appointmentDate: string;
+    timeSlot: string;
+    reason: string;
+    status: "pending" | "approved" | "completed" | "cancelled";
 }
 
 interface Patient {
-  _id?: string;
-  name: string;
-  email: string;
-  phone: string;
+    _id?: string;
+    name: string;
+    email: string;
+    phone: string;
 }
 
 export default function ReceptionistDashboard() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
-  // Fetch data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [doctorsRes, appointmentsRes, patientsRes] = await Promise.all([
-          http.get("/doctors"),
-          http.get("/appointments"),
-          http.get("/patients"),
-        ]);
+    // Fetch data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [doctorsRes, appointmentsRes, patientsRes] = await Promise.all([
+                    http.get("/doctors"),
+                    http.get("/appointments"),
+                    http.get("/patients"),
+                ]);
 
-        setDoctors(doctorsRes.data.data || []);
-        setAppointments(appointmentsRes.data.data || []);
-        setPatients(patientsRes.data.data || []);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+                setDoctors(doctorsRes.data.data || []);
+                setAppointments(appointmentsRes.data.data || []);
+                setPatients(patientsRes.data.data || []);
+            } catch (error) {
+                console.error("Failed to fetch data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetchData();
-  }, []);
+        fetchData();
+    }, []);
 
-  // Filters
-  const filteredDoctors = doctors.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredPatients = patients.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
-  const filteredAppointments = appointments.filter(
-    (a) =>
-      a.patient.name.toLowerCase().includes(search.toLowerCase()) ||
-      a.doctor.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-        <Navbar />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="loader">
-              <span className="loader-text">loading</span>
-              <span className="load"></span>
-            </div>
-          </main>
-        </div>
-      </div>
+    // Filters
+    const filteredDoctors = doctors.filter((d) =>
+        d.name.toLowerCase().includes(search.toLowerCase())
     );
-  }
+    const filteredPatients = patients.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredAppointments = appointments.filter(
+        (a) =>
+            a.patient.name.toLowerCase().includes(search.toLowerCase()) ||
+            a.doctor.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+                <Navbar />
+                <div className="flex flex-1">
+                    <Sidebar />
+                    <main className="flex-1 p-6 flex items-center justify-center">
+                        <div className="loader">
+                            <span className="loader-text">loading</span>
+                            <span className="load"></span>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <ProtectedRoute>
+        <ProtectedRoute allowedRoles={["receptionist"]}>
             <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
                 <Navbar />
 
