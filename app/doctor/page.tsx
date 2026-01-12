@@ -229,6 +229,17 @@ export default function Page() {
                 </thead>
 
                 <tbody>
+                  {currentDoctors.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="text-center py-10 text-gray-500 dark:text-gray-400"
+                      >
+                        No doctors found
+                      </td>
+                    </tr>
+                  )}
+
                   {currentDoctors.map((doctor) => (
                     <tr
                       key={doctor._id}
