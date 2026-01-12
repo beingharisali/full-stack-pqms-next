@@ -10,7 +10,6 @@ import http from "@/services/http";
 import { FiSearch } from "react-icons/fi";
 import { MdOutlineSort } from "react-icons/md";
 
-
 interface Appointment {
   _id: string;
   patient: {
@@ -45,7 +44,6 @@ export default function Page() {
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
 
-
   const fetchDoctors = async () => {
     try {
       const res = await http.get("/doctors");
@@ -55,7 +53,7 @@ export default function Page() {
     }
   };
 
-  // Fetch appointments 
+  // Fetch appointments
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -86,7 +84,10 @@ export default function Page() {
     })
     .sort((a, b) => {
       if (sort === "date") {
-        return new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime();
+        return (
+          new Date(a.appointmentDate).getTime() -
+          new Date(b.appointmentDate).getTime()
+        );
       } else if (sort === "patient") {
         return a.patient.name.localeCompare(b.patient.name);
       } else if (sort === "doctor") {
@@ -123,7 +124,10 @@ export default function Page() {
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
-            <div className="text-center">Loading appointments...</div>
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
           </main>
         </div>
       </div>
@@ -326,25 +330,42 @@ export default function Page() {
                 <tbody>
                   {currentAppointments.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-gray-500 dark:text-gray-400">
+                      <td
+                        colSpan={7}
+                        className="text-center py-10 text-gray-500 dark:text-gray-400"
+                      >
                         No appointments found
                       </td>
                     </tr>
                   )}
 
                   {currentAppointments.map((appt) => (
-                    <tr key={appt._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient?.name}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor?.name}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{new Date(appt.appointmentDate).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
-                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>
+                    <tr
+                      key={appt._id}
+                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    >
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.patient?.name}
+                      </td>
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.doctor?.name}
+                      </td>
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {new Date(appt.appointmentDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.timeSlot}
+                      </td>
+                      <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
+                        {appt.reason || "-"}
+                      </td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                            ${appt.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                              : appt.status === "approved"
+                            ${
+                              appt.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                : appt.status === "approved"
                                 ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                 : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
                             }`}
@@ -354,8 +375,18 @@ export default function Page() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
-                          <button onClick={() => handleEdit(appt._id)} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"><Pencil size={16} /> Edit</button>
-                          <button onClick={() => handleDelete(appt._id)} className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"><Trash2 size={16} /> Delete</button>
+                          <button
+                            onClick={() => handleEdit(appt._id)}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                          >
+                            <Pencil size={16} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(appt._id)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400"
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -366,9 +397,23 @@ export default function Page() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Previous</button>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Page <strong>{currentPage}</strong> of {totalPages}</span>
-                  <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Next</button>
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                    Page <strong>{currentPage}</strong> of {totalPages}
+                  </span>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  >
+                    Next
+                  </button>
                 </div>
               )}
             </div>
