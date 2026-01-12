@@ -7,6 +7,7 @@ import { Plus, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import http from "@/services/http";
+import ProtectedRoute from "../component/protectedRoutes";
 
 interface Appointment {
   _id: string;
@@ -105,6 +106,7 @@ export default function Page() {
 
   if (loading) {
     return (
+      <ProtectedRoute>
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar onLogout={() => console.log("logout")} />
         <div className="flex flex-1">
@@ -117,10 +119,12 @@ export default function Page() {
           </main>
         </div>
       </div>
+      </ProtectedRoute>
     );
   }
 
   return (
+    <ProtectedRoute allowedRoles={["admin"]}>
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
       <Navbar />
 
@@ -298,5 +302,7 @@ export default function Page() {
         </main>
       </div>
     </div>
+    </ProtectedRoute>
+
   );
 }

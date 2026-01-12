@@ -96,7 +96,7 @@ export default function Page() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
 

@@ -9,11 +9,11 @@ import ProtectedRoute from "../component/protectedRoutes";
 function Page() {
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["admin"]}>
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
 
         {/* Navbar */}
-        <Navbar onLogout={() => console.log("logout")} />
+        <Navbar  />
 
         {/* Page Content */}
         <div className="flex flex-1">
