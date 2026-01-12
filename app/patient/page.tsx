@@ -11,8 +11,6 @@ import http from "@/services/http";
 import { FiSearch } from "react-icons/fi";
 import { MdOutlineSort } from "react-icons/md";
 
-
-
 interface Patient {
   _id: string;
   name: string;
@@ -28,12 +26,13 @@ export default function Page() {
   const [sortBy, setSortBy] = useState<"name" | "age" | "">("");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const ITEMS_PER_PAGE = 5;
 
-
   const fetchPatients = async () => {
     try {
+      setLoading(true);
       const params: any = {};
       if (sortBy) {
         params.sortBy = sortBy;
@@ -45,13 +44,14 @@ export default function Page() {
       setCurrentPage(1);
     } catch (err) {
       console.error("Failed to fetch patients", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchPatients();
   }, [sortBy, order]);
-
 
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
@@ -74,6 +74,22 @@ export default function Page() {
     setSortBy(field as "name" | "age");
     setOrder(ord as "asc" | "desc");
   };
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Navbar />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -83,7 +99,6 @@ export default function Page() {
 
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -92,7 +107,6 @@ export default function Page() {
 
               <div className="flex gap-4 flex-wrap">
                 {/* Search */}
-
 
                 <Link href="/patient/createpatient">
                   <button
@@ -115,7 +129,6 @@ export default function Page() {
                     />
                     Create Patient
                   </button>
-
                 </Link>
               </div>
             </div>
@@ -210,7 +223,6 @@ export default function Page() {
               </div>
             </div>
 
-
             {/* Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
               <table className="w-full text-sm">
@@ -226,21 +238,29 @@ export default function Page() {
                 <tbody>
                   {currentPatients.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="text-center py-10 text-gray-500">
+                      <td
+                        colSpan={4}
+                        className="text-center py-10 text-gray-500"
+                      >
                         No patients found
                       </td>
                     </tr>
                   )}
 
                   {currentPatients.map((p) => (
-                    <tr key={p._id} className="border-b hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr
+                      key={p._id}
+                      className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                       <td className="px-6 py-4">{p.name}</td>
                       <td className="px-6 py-4">{p.age}</td>
                       <td className="px-6 py-4">{p.history}</td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-4">
                           <button
-                            onClick={() => router.push(`/patient/createpatient/${p._id}`)}
+                            onClick={() =>
+                              router.push(`/patient/createpatient/${p._id}`)
+                            }
                             className="text-blue-600 flex items-center gap-1"
                           >
                             <Pencil size={16} /> Edit
@@ -260,21 +280,22 @@ export default function Page() {
                 <div className="flex justify-between px-6 py-4">
                   <button
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
+                    onClick={() => setCurrentPage((p) => p - 1)}
                   >
                     Previous
                   </button>
-                  <span>Page {currentPage} of {totalPages}</span>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
                   <button
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
+                    onClick={() => setCurrentPage((p) => p + 1)}
                   >
                     Next
                   </button>
                 </div>
               )}
             </div>
-
           </div>
         </main>
       </div>

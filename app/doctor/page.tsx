@@ -24,8 +24,12 @@ export default function Page() {
   const router = useRouter();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [availabilityFilter, setAvailabilityFilter] = useState("");
-  const [sortField, setSortField] = useState<"name" | "specialization" | "availability" | "">("");
+  const [sortField, setSortField] = useState<
+    "name" | "specialization" | "availability" | ""
+  >("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const ITEMS_PER_PAGE = 4;
@@ -34,15 +38,19 @@ export default function Page() {
   // Fetch doctors from backend with filter & sort
   const fetchDoctors = async () => {
     try {
+      setLoading(true);
       const params: any = {};
       if (availabilityFilter) params.availability = availabilityFilter;
-      if (sortField) params.sort = sortOrder === "asc" ? sortField : `-${sortField}`;
+      if (sortField)
+        params.sort = sortOrder === "asc" ? sortField : `-${sortField}`;
 
       const res = await http.get("/doctors", { params });
       setDoctors(res.data.data || []);
       setCurrentPage(1);
     } catch (error) {
       console.error("Failed to fetch doctors", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +83,9 @@ export default function Page() {
     }
   };
 
-  const handleSortChange = (field: "name" | "specialization" | "availability" | "") => {
+  const handleSortChange = (
+    field: "name" | "specialization" | "availability" | ""
+  ) => {
     if (field === sortField) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
@@ -83,6 +93,23 @@ export default function Page() {
       setSortOrder("asc");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Navbar />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 p-6 flex items-center justify-center">
+            <div className="loader">
+              <span className="loader-text">loading</span>
+              <span className="load"></span>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -109,7 +136,10 @@ export default function Page() {
                 type="text"
                 placeholder="Search doctor or specialization..."
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
               />
 
@@ -199,35 +229,52 @@ export default function Page() {
                 </thead>
 
                 <tbody>
-                  {currentDoctors.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="text-center py-10 text-gray-500 dark:text-gray-400">
-                        No doctors found
-                      </td>
-                    </tr>
-                  )}
-
                   {currentDoctors.map((doctor) => (
-                    <tr key={doctor._id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                    <tr
+                      key={doctor._id}
+                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                    >
                       <td className="px-6 py-4 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white flex items-center justify-center font-semibold uppercase shadow-md">
-                          {doctor.name.split(" ").slice(0, 2).map(n => n[0]).join("")}
+                          {doctor.name
+                            .split(" ")
+                            .slice(0, 2)
+                            .map((n) => n[0])
+                            .join("")}
                         </div>
-                        <span className="font-medium text-gray-800 dark:text-gray-100">{doctor.name}</span>
+                        <span className="font-medium text-gray-800 dark:text-gray-100">
+                          {doctor.name}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{doctor.specialization}</td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                        {doctor.specialization}
+                      </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                          ${doctor.availability === "morning" ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                            : doctor.availability === "afternoon" ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                              : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"}`}>{doctor.availability}</span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                          ${
+                            doctor.availability === "morning"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                              : doctor.availability === "afternoon"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                              : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200"
+                          }`}
+                        >
+                          {doctor.availability}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-3">
-                          <button onClick={() => handleEdit(doctor._id)} className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition">
+                          <button
+                            onClick={() => handleEdit(doctor._id)}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition"
+                          >
                             <Pencil size={16} /> Edit
                           </button>
-                          <button onClick={() => handleDelete(doctor._id)} className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition">
+                          <button
+                            onClick={() => handleDelete(doctor._id)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition"
+                          >
                             <Trash2 size={16} /> Delete
                           </button>
                         </div>
@@ -240,9 +287,23 @@ export default function Page() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-                  <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition">Previous</button>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">Page <strong>{currentPage}</strong> of {totalPages}</span>
-                  <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition">Next</button>
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                    Page <strong>{currentPage}</strong> of {totalPages}
+                  </span>
+                  <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                  >
+                    Next
+                  </button>
                 </div>
               )}
             </div>
