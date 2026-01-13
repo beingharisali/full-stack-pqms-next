@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Sidebar from "../component/sidebar";
+import Sidebar from "../component/doctorsidebar";
 import Navbar from "../component/navbar";
 import Footer from "../component/footer";
 import http from "@/services/http";
@@ -10,7 +10,7 @@ import ProtectedRoute from "../component/protectedRoutes";
 interface Appointment {
   _id: string;
   patient?: { _id: string; name?: string }; // optional
-  doctor?: { _id: string; name?: string };  // optional
+  doctor?: { _id: string; name?: string }; // optional
   appointmentDate: string;
   timeSlot: string;
   reason: string;
@@ -23,7 +23,6 @@ export default function Page() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 4;
-
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -40,11 +39,13 @@ export default function Page() {
     fetchAppointments();
   }, []);
 
-
   const filteredAppointments = appointments.filter((appt) => {
     const patientName = appt.patient?.name?.toLowerCase() || "";
     const doctorName = appt.doctor?.name?.toLowerCase() || "";
-    return patientName.includes(search.toLowerCase()) || doctorName.includes(search.toLowerCase());
+    return (
+      patientName.includes(search.toLowerCase()) ||
+      doctorName.includes(search.toLowerCase())
+    );
   });
 
   const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
@@ -54,8 +55,10 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
-
-  const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
+  const handleStatusChange = async (
+    id: string,
+    newStatus: Appointment["status"]
+  ) => {
     try {
       await http.put(`/appointments/${id}`, { status: newStatus });
       setAppointments((prev) =>
@@ -66,7 +69,6 @@ export default function Page() {
       alert("Failed to update status");
     }
   };
-
 
   if (loading) {
     return (
@@ -86,7 +88,6 @@ export default function Page() {
     );
   }
 
-
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -98,7 +99,7 @@ export default function Page() {
               {/* Search */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  Appointment Management
+                  Appointment Details
                 </h1>
                 <input
                   type="text"
@@ -131,7 +132,10 @@ export default function Page() {
                   <tbody>
                     {currentAppointments.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-6 text-gray-500 dark:text-gray-300">
+                        <td
+                          colSpan={6}
+                          className="text-center py-6 text-gray-500 dark:text-gray-300"
+                        >
                           No appointments found
                         </td>
                       </tr>
@@ -148,7 +152,9 @@ export default function Page() {
                             {appt.doctor?.name || "-"}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                            {new Date(appt.appointmentDate).toLocaleDateString()}
+                            {new Date(
+                              appt.appointmentDate
+                            ).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                             {appt.timeSlot}
@@ -166,13 +172,14 @@ export default function Page() {
                                 )
                               }
                               className={`px-3 py-1 rounded-full text-xs font-medium capitalize cursor-pointer
-                                ${appt.status === "pending"
-                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                                  : appt.status === "approved"
+                                ${
+                                  appt.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                                    : appt.status === "approved"
                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
                                     : appt.status === "completed"
-                                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                                    : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
                                 }`}
                             >
                               <option value="pending">pending</option>
