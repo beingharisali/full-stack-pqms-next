@@ -18,8 +18,8 @@ interface Doctor {
 
 interface Appointment {
     _id: string;
-    patient: { _id: string; name: string };
-    doctor: { _id: string; name: string };
+    patient?: { _id: string; name: string };
+    doctor?: { _id: string; name: string };
     appointmentDate: string;
     timeSlot: string;
     reason: string;
@@ -40,7 +40,7 @@ export default function ReceptionistDashboard() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
-    // Fetch data
+   
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -63,18 +63,24 @@ export default function ReceptionistDashboard() {
         fetchData();
     }, []);
 
-    // Filters
+    
     const filteredDoctors = doctors.filter((d) =>
         d.name.toLowerCase().includes(search.toLowerCase())
     );
+
     const filteredPatients = patients.filter((p) =>
         p.name.toLowerCase().includes(search.toLowerCase())
     );
-    const filteredAppointments = appointments.filter(
-        (a) =>
-            a.patient.name.toLowerCase().includes(search.toLowerCase()) ||
-            a.doctor.name.toLowerCase().includes(search.toLowerCase())
-    );
+
+    const filteredAppointments = appointments.filter((a) => {
+        const patientName = a.patient?.name?.toLowerCase() || "";
+        const doctorName = a.doctor?.name?.toLowerCase() || "";
+        return (
+            patientName.includes(search.toLowerCase()) ||
+            doctorName.includes(search.toLowerCase())
+        );
+    });
+
 
     if (loading) {
         return (
@@ -89,6 +95,7 @@ export default function ReceptionistDashboard() {
                         </div>
                     </main>
                 </div>
+                <Footer />
             </div>
         );
     }
@@ -97,10 +104,8 @@ export default function ReceptionistDashboard() {
         <ProtectedRoute allowedRoles={["receptionist"]}>
             <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
                 <Navbar />
-
                 <div className="flex flex-1">
                     <Sidebar />
-
                     <main className="flex-1 p-6">
                         <div className="max-w-7xl mx-auto">
                             {/* Header + Buttons */}
@@ -112,20 +117,18 @@ export default function ReceptionistDashboard() {
                                 <div className="flex gap-4">
                                     <Link href="/apointment/createapointment">
                                         <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
-                                            <Plus size={18} />
-                                            Create Appointment
+                                            <Plus size={18} /> Create Appointment
                                         </button>
                                     </Link>
                                     <Link href="/patient/createpatient">
                                         <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition">
-                                            <Plus size={18} />
-                                            Create Patient
+                                            <Plus size={18} /> Create Patient
                                         </button>
                                     </Link>
                                 </div>
                             </div>
 
-                            {/* Search Bar Below Buttons */}
+                            {/* Search Bar */}
                             <div className="mb-8">
                                 <input
                                     type="text"
@@ -133,8 +136,8 @@ export default function ReceptionistDashboard() {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="w-full sm:w-96 px-4 py-3 rounded-xl border border-gray-300
-                dark:border-gray-600 dark:bg-gray-800 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  dark:border-gray-600 dark:bg-gray-800 dark:text-white
+                  focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
@@ -143,7 +146,7 @@ export default function ReceptionistDashboard() {
                                 <h2 className="px-6 py-4 font-semibold text-gray-800 dark:text-gray-100">
                                     Doctors
                                 </h2>
-                                <table className="w-full text-sm">
+                                <table className="w-full text-sm border border-gray-200 dark:border-gray-700">
                                     <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                                         <tr>
                                             <th className="text-left px-6 py-4">Name</th>
@@ -179,7 +182,7 @@ export default function ReceptionistDashboard() {
                                 <h2 className="px-6 py-4 font-semibold text-gray-800 dark:text-gray-100">
                                     Patients
                                 </h2>
-                                <table className="w-full text-sm">
+                                <table className="w-full text-sm border border-gray-200 dark:border-gray-700">
                                     <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                                         <tr>
                                             <th className="text-left px-6 py-4">Name</th>
@@ -215,7 +218,7 @@ export default function ReceptionistDashboard() {
                                 <h2 className="px-6 py-4 font-semibold text-gray-800 dark:text-gray-100">
                                     Appointments
                                 </h2>
-                                <table className="w-full text-sm">
+                                <table className="w-full text-sm border border-gray-200 dark:border-gray-700">
                                     <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                                         <tr>
                                             <th className="text-left px-6 py-4">Patient</th>
@@ -239,8 +242,8 @@ export default function ReceptionistDashboard() {
                                                     key={appt._id}
                                                     className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                                                 >
-                                                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient.name}</td>
-                                                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor.name}</td>
+                                                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.patient?.name || "-"}</td>
+                                                    <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.doctor?.name || "-"}</td>
                                                     <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{new Date(appt.appointmentDate).toLocaleDateString()}</td>
                                                     <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.timeSlot}</td>
                                                     <td className="px-6 py-4 text-gray-800 dark:text-gray-100">{appt.reason || "-"}</td>

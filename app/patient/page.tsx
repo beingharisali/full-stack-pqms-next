@@ -29,10 +29,6 @@ export default function Page() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // 🔴 Delete modal state
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
   const ITEMS_PER_PAGE = 5;
 
   const fetchPatients = async () => {
@@ -70,7 +66,7 @@ export default function Page() {
   );
 
   const handleSortChange = (value: string) => {
-    if (!value.trim()) {
+    if (!value) {
       setSortBy("");
       return;
     }
@@ -79,35 +75,13 @@ export default function Page() {
     setSortBy(field as "name" | "age");
     setOrder(ord as "asc" | "desc");
   };
-
-  // 🔴 Open delete modal
-  const openDeleteModal = (id: string) => {
-    setDeleteId(id);
-    setShowDeleteModal(true);
-  };
-
-  // 🔴 Confirm delete
-  const confirmDelete = async () => {
-    if (!deleteId) return;
-
-    try {
-      await http.delete(`/patients/${deleteId}`);
-      setPatients((prev) => prev.filter((p) => p._id !== deleteId));
-    } catch (error) {
-      console.error("Delete failed", error);
-    } finally {
-      setShowDeleteModal(false);
-      setDeleteId(null);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
         <div className="flex flex-1">
           <Sidebar />
-          <main className="flex-1 flex items-center justify-center">
+          <main className="flex-1 p-6 flex items-center justify-center">
             <div className="loader">
               <span className="loader-text">loading</span>
               <span className="load"></span>
@@ -133,21 +107,48 @@ export default function Page() {
                   Patient Management
                 </h1>
 
-                <Link href="/patient/createpatient">
-                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl">
-                    <Plus size={18} />
-                    Create Patient
-                  </button>
-                </Link>
-              </div>
+                <div className="flex gap-4 flex-wrap">
+                  {/* Search */}
 
-              {/* Search & Sort */}
+                  <Link href="/patient/createpatient">
+                    <button
+                      className="
+    flex items-center justify-center gap-2
+    bg-gradient-to-r from-blue-500 to-blue-500
+    text-white font-semibold
+    px-6 py-3 rounded-xl
+    shadow-md hover:shadow-lg
+    transition-all duration-200 ease-in-out
+    hover:from-blue-300 hover:to-blue-700
+    active:from-green-700 active:to-green-800
+    transform hover:-translate-y-0.5
+    focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2
+  "
+                    >
+                      <Plus
+                        size={18}
+                        className="transition-transform duration-200 group-hover:rotate-12"
+                      />
+                      Create Patient
+                    </button>
+                  </Link>
+                </div>
+              </div>
               <div className="mb-3 flex justify-end gap-3">
-                <div className="relative w-64">
+                {/* Search */}
+                <div className="relative w-64 group">
+                  {/* Search Icon */}
                   <FiSearch
                     size={18}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="
+        absolute left-4 top-1/2 -translate-y-1/2
+        text-gray-400
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+        pointer-events-none
+      "
                   />
+
                   <input
                     type="text"
                     placeholder="Search patient name..."
@@ -156,51 +157,103 @@ export default function Page() {
                       setSearch(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border bg-white dark:bg-gray-800"
+                    className="
+        w-full pl-11 pr-4 py-3
+        rounded-xl border
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        placeholder-gray-400
+
+        border-gray-300 dark:border-gray-700
+        transition-all duration-200 ease-in-out
+
+        hover:border-blue-500 hover:shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+      "
                   />
                 </div>
 
-                <div className="relative w-56">
+                {/* Sort */}
+                <div className="relative w-56 group">
+                  {/* Sort Icon */}
                   <MdOutlineSort
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="
+        absolute left-4 top-1/2 -translate-y-1/2
+        text-gray-400
+        pointer-events-none
+        transition-colors duration-200
+        group-focus-within:text-blue-500
+      "
                   />
+
                   <select
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border bg-white dark:bg-gray-800"
+                    className="
+        w-full appearance-none
+        pl-11 pr-10 py-3
+        rounded-xl border
+        bg-white dark:bg-gray-800
+        text-gray-700 dark:text-white
+        border-gray-300 dark:border-gray-700
+
+        transition-all duration-200 ease-in-out
+        hover:border-blue-500 hover:shadow-md
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+
+        cursor-pointer
+      "
                   >
-                    <option value="">SORT BY</option>
-                    <option value="name_asc">A–Z Name</option>
-                    <option value="name_desc">Z–A Name</option>
-                    <option value="age_asc">Age ↑</option>
-                    <option value="age_desc">Age ↓</option>
+                    <option value=" ">SORT BY</option>
+                    <option value="name_asc">A–Z ⬆ Name</option>
+                    <option value="name_desc">Z–A ⬇ Name</option>
+                    <option value="age_asc">⬆ Age</option>
+                    <option value="age_desc">⬇ Age</option>
                   </select>
+
+                  {/* Dropdown Arrow */}
+                  <span
+                    className="
+        pointer-events-none absolute right-4 top-1/2 -translate-y-1/2
+        text-gray-500 dark:text-gray-400
+        transition-transform duration-200
+        group-hover:rotate-180
+      "
+                  >
+                    ▼
+                  </span>
                 </div>
               </div>
 
-            
+              {/* Table */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-4 text-left">NAME</th>
-                      <th className="px-6 py-4 text-left">AGE</th>
-                      <th className="px-6 py-4 text-left">HISTORY</th>
-                      <th className="px-6 py-4 text-right">ACTIONS</th>
+                      <th className="text-left px-6 py-4">NAME</th>
+                      <th className="text-left px-6 py-4">AGE</th>
+                      <th className="text-left px-6 py-4">HISTORY</th>
+                      <th className="text-right px-6 py-4">ACTIONS</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {currentPatients.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="text-center py-10">
+                        <td
+                          colSpan={4}
+                          className="text-center py-10 text-gray-500"
+                        >
                           No patients found
                         </td>
                       </tr>
                     )}
 
                     {currentPatients.map((p) => (
-                      <tr key={p._id} className="border-b">
+                      <tr
+                        key={p._id}
+                        className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
                         <td className="px-6 py-4">{p.name}</td>
                         <td className="px-6 py-4">{p.age}</td>
                         <td className="px-6 py-4">{p.history}</td>
@@ -210,15 +263,11 @@ export default function Page() {
                               onClick={() =>
                                 router.push(`/patient/createpatient/${p._id}`)
                               }
-                              className="text-blue-600 flex gap-1"
+                              className="text-blue-600 flex items-center gap-1"
                             >
                               <Pencil size={16} /> Edit
                             </button>
-
-                            <button
-                              onClick={() => openDeleteModal(p._id)}
-                              className="text-red-600 flex gap-1"
-                            >
+                            <button className="text-red-600 flex items-center gap-1">
                               <Trash2 size={16} /> Delete
                             </button>
                           </div>
@@ -228,7 +277,7 @@ export default function Page() {
                   </tbody>
                 </table>
 
-              
+                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex justify-between px-6 py-4">
                     <button
@@ -254,34 +303,6 @@ export default function Page() {
         </div>
         <Footer />
       </div>
-
-  
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-400/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h2 className="text-xl font-semibold">Delete Patient</h2>
-            <p className="mt-3 text-gray-600 dark:text-gray-300">
-              Are you sure you want to delete this patient? 
-            </p>
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border rounded-lg"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </ProtectedRoute>
   );
 }

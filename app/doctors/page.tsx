@@ -7,17 +7,10 @@ import Footer from "../component/footer";
 import http from "@/services/http";
 import ProtectedRoute from "../component/protectedRoutes";
 
-
 interface Appointment {
   _id: string;
-  patient: {
-    _id: string;
-    name: string;
-  };
-  doctor: {
-    _id: string;
-    name: string;
-  };
+  patient?: { _id: string; name?: string }; // optional
+  doctor?: { _id: string; name?: string };  // optional
   appointmentDate: string;
   timeSlot: string;
   reason: string;
@@ -30,6 +23,7 @@ export default function Page() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 4;
+
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -47,11 +41,11 @@ export default function Page() {
   }, []);
 
 
-  const filteredAppointments = appointments.filter(
-    (appt) =>
-      appt.patient.name.toLowerCase().includes(search.toLowerCase()) ||
-      appt.doctor.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAppointments = appointments.filter((appt) => {
+    const patientName = appt.patient?.name?.toLowerCase() || "";
+    const doctorName = appt.doctor?.name?.toLowerCase() || "";
+    return patientName.includes(search.toLowerCase()) || doctorName.includes(search.toLowerCase());
+  });
 
   const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -60,10 +54,8 @@ export default function Page() {
     startIndex + ITEMS_PER_PAGE
   );
 
-  const handleStatusChange = async (
-    id: string,
-    newStatus: Appointment["status"]
-  ) => {
+
+  const handleStatusChange = async (id: string, newStatus: Appointment["status"]) => {
     try {
       await http.put(`/appointments/${id}`, { status: newStatus });
       setAppointments((prev) =>
@@ -75,11 +67,11 @@ export default function Page() {
     }
   };
 
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
-
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 p-6 flex items-center justify-center">
@@ -89,23 +81,21 @@ export default function Page() {
             </div>
           </main>
         </div>
-
         <Footer />
       </div>
     );
   }
 
+
   return (
     <ProtectedRoute allowedRoles={["doctor"]}>
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
-
         <div className="flex flex-1">
           <Sidebar />
-
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
-              {/* 🔍 Search Bar */}
+              {/* Search */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   Appointment Management
@@ -116,7 +106,7 @@ export default function Page() {
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
-                    setCurrentPage(1); // Reset page on new search
+                    setCurrentPage(1);
                   }}
                   className="w-full sm:w-64 px-4 py-3 rounded-xl border border-gray-300
                   dark:border-gray-600 dark:bg-gray-800 dark:text-white
@@ -124,8 +114,9 @@ export default function Page() {
                 />
               </div>
 
+              {/* Appointments Table */}
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm border border-gray-200 dark:border-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                     <tr>
                       <th className="text-left px-6 py-4">Patient</th>
@@ -140,10 +131,7 @@ export default function Page() {
                   <tbody>
                     {currentAppointments.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan={6}
-                          className="text-center py-6 text-gray-500 dark:text-gray-300"
-                        >
+                        <td colSpan={6} className="text-center py-6 text-gray-500 dark:text-gray-300">
                           No appointments found
                         </td>
                       </tr>
@@ -154,10 +142,10 @@ export default function Page() {
                           className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                         >
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                            {appt.patient.name}
+                            {appt.patient?.name || "-"}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                            {appt.doctor.name}
+                            {appt.doctor?.name || "-"}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
                             {new Date(appt.appointmentDate).toLocaleDateString()}
@@ -178,7 +166,7 @@ export default function Page() {
                                 )
                               }
                               className={`px-3 py-1 rounded-full text-xs font-medium capitalize cursor-pointer
-                              ${appt.status === "pending"
+                                ${appt.status === "pending"
                                   ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
                                   : appt.status === "approved"
                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
@@ -199,6 +187,7 @@ export default function Page() {
                   </tbody>
                 </table>
 
+                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
                     <button
@@ -226,7 +215,6 @@ export default function Page() {
             </div>
           </main>
         </div>
-
         <Footer />
       </div>
     </ProtectedRoute>
