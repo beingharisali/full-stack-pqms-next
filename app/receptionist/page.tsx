@@ -112,12 +112,12 @@ export default function ReceptionistDashboard() {
                 </h1>
 
                 <div className="flex gap-4">
-                  <Link href="/apointment/createapointment">
+                  <Link href="/receptionist/createapointment">
                     <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition">
                       <Plus size={18} /> Create Appointment
                     </button>
                   </Link>
-                  <Link href="/patient/createpatient">
+                  <Link href="/receptionist/createpatient">
                     <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl transition">
                       <Plus size={18} /> Create Patient
                     </button>
