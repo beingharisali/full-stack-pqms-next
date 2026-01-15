@@ -8,33 +8,33 @@ import Unauthorized from "./unoth";
 type Role = "admin" | "doctor" | "receptionist";
 
 interface Props {
-    children: ReactNode;
-    allowedRoles?: Role[]; // roles allowed page
+  children: ReactNode;
+  allowedRoles?: Role[];
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-    const { user, isAuthenticated } = useAuth();
-    const router = useRouter();
+  const { user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.replace("/");
-        }
-    }, [isAuthenticated, router]);
+  useEffect(() => {
+    if (loading) return;
 
     if (!isAuthenticated) {
-        return <p className="text-center mt-10">Loading...</p>;
+      router.replace("/");
     }
-
-    // 🔹 Admin can access everything
-    if (user?.role === "admin") {
-        return <>{children}</>;
-    }
+  }, [loading, isAuthenticated, router]);
 
 
-    if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-        return <Unauthorized />;
-    }
+  if (loading) {
+    return <p className="text-center mt-10">Checking authentication...</p>;
+  }
 
-    return <>{children}</>;
+  if (!isAuthenticated) return null;
+
+
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Unauthorized />;
+  }
+
+  return <>{children}</>;
 }
