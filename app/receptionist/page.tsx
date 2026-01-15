@@ -84,7 +84,7 @@ export default function ReceptionistDashboard() {
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
         <div className="flex flex-1">
-          <Sidebar />
+          {/* <Sidebar /> */}
           <main className="flex-1 p-6 flex items-center justify-center">
             <div className="loader">
               <span className="loader-text">loading</span>
@@ -102,7 +102,7 @@ export default function ReceptionistDashboard() {
       <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
         <Navbar />
         <div className="flex flex-1">
-          <Sidebar />
+          {/* <Sidebar /> */}
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
               {/* Header + Buttons */}
@@ -192,8 +192,8 @@ export default function ReceptionistDashboard() {
                   <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 border-b dark:border-gray-600">
                     <tr>
                       <th className="text-left px-6 py-4">Name</th>
-                      <th className="text-left px-6 py-4">Email</th>
-                      <th className="text-left px-6 py-4">Phone</th>
+                      <th className="text-left px-6 py-4">Age</th>
+                      <th className="text-left px-6 py-4">History</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -216,10 +216,10 @@ export default function ReceptionistDashboard() {
                             {patient.name}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                            {patient.email}
+                            {patient.age}
                           </td>
                           <td className="px-6 py-4 text-gray-800 dark:text-gray-100">
-                            {patient.phone}
+                            {patient.history}
                           </td>
                         </tr>
                       ))
@@ -280,15 +280,14 @@ export default function ReceptionistDashboard() {
                           <td className="px-6 py-4">
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-medium capitalize
-                              ${
-                                appt.status === "pending"
+                              ${appt.status === "pending"
                                   ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
                                   : appt.status === "approved"
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                                  : appt.status === "completed"
-                                  ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                                  : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-                              }`}
+                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                                    : appt.status === "completed"
+                                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                                      : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                                }`}
                             >
                               {appt.status}
                             </span>
